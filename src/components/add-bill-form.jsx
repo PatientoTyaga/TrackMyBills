@@ -3,14 +3,14 @@
 import currencies from '@/app/utils/currencies'
 import { useState } from 'react'
 
-const currencyOptions = ['USD', 'EUR', 'GBP', 'CAD', 'BIF', 'KES']
-
 export default function AddBillForm({ setBills }) {
   const [form, setForm] = useState({
     name: '',
     dueDate: '',
     amount: '',
     currency: 'USD',
+    frequency: 'One-time',
+    reminderDays: 3,
   })
 
   const handleChange = (e) => {
@@ -29,7 +29,14 @@ export default function AddBillForm({ setBills }) {
     const updated = [...stored, newBill]
     localStorage.setItem('bills', JSON.stringify(updated))
     setBills(updated)
-    setForm({ name: '', dueDate: '', amount: '', currency: 'USD' })
+    setForm({
+      name: '',
+      dueDate: '',
+      amount: '',
+      currency: 'USD',
+      frequency: 'One-time',
+      reminderDays: 3,
+    })
   }
 
   return (
@@ -75,15 +82,46 @@ export default function AddBillForm({ setBills }) {
 
         <div>
           <label className="block mb-1 text-sm">Currency</label>
-
-          <select>
+          <select
+            name="currency"
+            value={form.currency}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded"
+          >
             {currencies.map((currency) => (
               <option key={currency.code} value={currency.code}>
                 {currency.flag} {currency.code} - {currency.name}
               </option>
             ))}
           </select>
+        </div>
+      </div>
 
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block mb-1 text-sm">Frequency</label>
+          <select
+            name="frequency"
+            value={form.frequency}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded"
+          >
+            <option value="One-time">One-time</option>
+            <option value="Monthly">Monthly</option>
+            <option value="Yearly">Yearly</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block mb-1 text-sm">Reminder Days</label>
+          <input
+            type="number"
+            name="reminderDays"
+            value={form.reminderDays}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded"
+            min="0"
+          />
         </div>
       </div>
 
