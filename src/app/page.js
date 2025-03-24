@@ -1,8 +1,9 @@
 'use client'
 
-import AddBillBtn from '@/components/add-bill-btn'
-import DashboardBoard from '@/components/dashboard'
 import { useEffect, useState } from 'react'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import DashboardBoard from '@/components/dashboard'
+import AddBillForm from '@/components/add-bill-form'
 
 export default function Home() {
   const [bills, setBills] = useState([])
@@ -11,13 +12,6 @@ export default function Home() {
     const storedBills = JSON.parse(localStorage.getItem('bills')) || []
     setBills(storedBills)
   }, [])
-
-  const getUpcomingBills = () => {
-    return bills
-      .filter((bill) => new Date(bill.dueDate) >= new Date())
-      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-      .slice(0, 5)
-  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6 py-8 max-w-6xl mx-auto">
@@ -29,14 +23,27 @@ export default function Home() {
         <p className="text-gray-600 dark:text-gray-300">
           Keep track of all your subscriptions and bill payments in one place.
         </p>
-        <AddBillBtn />
+
+        {/* Dialog Button */}
+        <Dialog>
+          <DialogTrigger className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition">
+            Add a Bill
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add a New Bill</DialogTitle>
+              <DialogDescription>Enter the bill details below.</DialogDescription>
+            </DialogHeader>
+            <AddBillForm setBills={setBills} />
+          </DialogContent>
+        </Dialog>
       </section>
 
       {/* Right side */}
       <DashboardBoard />
 
-      {/* sign up section*/}
-      <section className="mt-12 border-t pt-8 text-center space-y-4">
+      {/* Sign Up CTA */}
+      <section className="mt-12 border-t pt-8 text-center space-y-4 md:col-span-2">
         <h2 className="text-xl font-semibold">
           Want to access your bills from anywhere?
         </h2>
@@ -45,7 +52,6 @@ export default function Home() {
           It’s completely free — no payment information needed.
         </p>
 
-        {/* Replace with actual video embed later */}
         <div className="mt-4 max-w-md mx-auto rounded-lg overflow-hidden shadow-lg">
           <video controls autoPlay loop muted className="w-full h-auto">
             <source src="/demo.mp4" type="video/mp4" />
@@ -60,7 +66,6 @@ export default function Home() {
           Create a Free Account
         </a>
       </section>
-
     </div>
   )
 }

@@ -36,12 +36,12 @@ export default function Navbar() {
             {isDark ? 'Light Mode' : 'Dark Mode'}
           </button>
 
-          <Link href="/signin" className="text-sm text-gray-700 dark:text-gray-300 hover:underline">
+          <Link href="/sign-in" className="text-sm text-gray-700 dark:text-gray-300 hover:underline">
             Sign In
           </Link>
 
           <Link
-            href="/signup"
+            href="/sign-up"
             className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition"
           >
             Sign Up
