@@ -62,7 +62,7 @@ export default function Home() {
         </div>
 
         <a
-          href="/signup"
+          href="/sign-up"
           className="inline-block mt-6 bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition"
         >
           Create a Free Account
