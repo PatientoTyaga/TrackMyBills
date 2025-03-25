@@ -1,45 +1,26 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import currencies from '@/app/utils/currencies' // ✅ Update path if needed
 
-function BillCard({ bill }) {
-  return (
-    <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow border border-gray-200 dark:border-gray-700">
-      <div className="flex justify-between mb-2">
-        <h3 className="font-semibold text-gray-800 dark:text-white">{bill.name}</h3>
-        <span className="text-sm text-gray-600 dark:text-gray-300">${bill.amount}</span>
-      </div>
-      <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
-        <span>Due: {new Date(bill.dueDate).toLocaleDateString()}</span>
-        <span>Status: {new Date(bill.dueDate) < new Date() ? 'Paid' : 'Unpaid'}</span>
-      </div>
-    </div>
-  )
-}
-
-export default function DashboardBoard() {
-  const [bills, setBills] = useState([])
+export default function DashboardBoard({ bills }) {
   const [currentPage, setCurrentPage] = useState(0)
   const billsPerPage = 4
 
-  useEffect(() => {
-    const storedBills = JSON.parse(localStorage.getItem('bills')) || []
-    const upcoming = storedBills
-      .filter((bill) => new Date(bill.dueDate) >= new Date())
-      .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-    setBills(upcoming)
-  }, [])
+  const unpaidUpcoming = bills
+    .filter((bill) => !bill.isPaid)
+    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
 
-  const totalPages = Math.ceil(bills.length / billsPerPage)
+  const totalPages = Math.ceil(unpaidUpcoming.length / billsPerPage)
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentPage((prev) => (prev + 1) % totalPages)
-    }, 4000)
+    }, 8000)
     return () => clearInterval(interval)
   }, [totalPages])
 
-  const displayedBills = bills.slice(
+  const displayedBills = unpaidUpcoming.slice(
     currentPage * billsPerPage,
     (currentPage + 1) * billsPerPage
   )
@@ -54,18 +35,23 @@ export default function DashboardBoard() {
 
         <ul className="flex-1 overflow-y-auto space-y-2 pr-1">
           {displayedBills.length > 0 ? (
-            displayedBills.map((bill, idx) => (
-              <li
-                key={idx}
-                className="flex justify-between border-b border-green-700 pb-1"
-              >
-                <span>{bill.name}</span>
-                <span>${bill.amount}</span>
-                <span className="text-xs">
-                  {new Date(bill.dueDate).toLocaleDateString()}
-                </span>
-              </li>
-            ))
+            displayedBills.map((bill, idx) => {
+              const currency = currencies.find((c) => c.code === bill.currency)
+              const symbol = currency?.symbol || bill.currency
+
+              return (
+                <li
+                  key={idx}
+                  className="flex justify-between border-b border-green-700 pb-1"
+                >
+                  <span>{bill.name}</span>
+                  <span>{symbol} {bill.amount}</span>
+                  <span className="text-xs">
+                    {new Date(bill.dueDate).toLocaleDateString()}
+                  </span>
+                </li>
+              )
+            })
           ) : (
             <li className="text-green-400">No upcoming bills yet.</li>
           )}
@@ -89,15 +75,6 @@ export default function DashboardBoard() {
             Next ➡️
           </button>
         </div>
-      </div>
-
-      {/* Bill Cards Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {bills.length > 0 ? (
-          bills.map((bill) => <BillCard key={bill.id} bill={bill} />)
-        ) : (
-          <p className="text-gray-500 dark:text-gray-300">No bills saved yet.</p>
-        )}
       </div>
     </section>
   )

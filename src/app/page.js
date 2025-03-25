@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import DashboardBoard from '@/components/dashboard'
-import AddBillForm from '@/components/add-bill-form'
+import BillList from '@/components/bill-list'
+import AddBillDialog from '@/components/add-bill-dialog'
 
 export default function Home() {
   const [bills, setBills] = useState([])
@@ -13,11 +13,9 @@ export default function Home() {
     setBills(storedBills)
   }, [])
 
-  
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6 py-8 max-w-6xl mx-auto">
-      {/* Left side */}
+      {/* Welcome Section */}
       <section className="flex flex-col justify-center space-y-6">
         <h1 className="text-4xl font-bold leading-tight">
           Welcome to <span className="text-blue-600">TrackMyBills</span>
@@ -26,26 +24,19 @@ export default function Home() {
           Keep track of all your subscriptions and bill payments in one place.
         </p>
 
-        {/* Dialog Button */}
-        <Dialog>
-          <DialogTrigger className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition">
-            Add a Bill
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add a New Bill</DialogTitle>
-              <DialogDescription>Enter the bill details below.</DialogDescription>
-            </DialogHeader>
-            <AddBillForm setBills={setBills} />
-          </DialogContent>
-        </Dialog>
+        <AddBillDialog setBills={setBills} />
       </section>
 
-      {/* Right side */}
-      <DashboardBoard />
+      {/* Dashboard */}
+      <DashboardBoard bills={bills} />
+
+      {/* Bill List Section (Unpaid + Paid) */}
+      <section className="md:col-span-2">
+        <BillList bills={bills} setBills={setBills} />
+      </section>
 
       {/* Sign Up CTA */}
-      <section className="mt-12 border-t pt-8 text-center space-y-4 md:col-span-2">
+      <section className="md:col-span-2 mt-12 border-t pt-8 text-center space-y-4">
         <h2 className="text-xl font-semibold">
           Want to access your bills from anywhere?
         </h2>

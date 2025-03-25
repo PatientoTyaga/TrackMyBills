@@ -23,6 +23,7 @@ export default function AddBillForm({ setBills }) {
       ...form,
       id: Date.now(),
       amount: parseFloat(form.amount).toFixed(2),
+      isPaid: false,
     }
 
     const stored = JSON.parse(localStorage.getItem('bills')) || []
