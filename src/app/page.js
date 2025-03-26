@@ -4,14 +4,37 @@ import { useEffect, useState } from 'react'
 import DashboardBoard from '@/components/dashboard'
 import BillList from '@/components/bill-list'
 import AddBillDialog from '@/components/add-bill-dialog'
+import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs'
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
   const [bills, setBills] = useState([])
+  const [checkingSession, setCheckingSession] = useState(true)
+  const supabase = createPagesBrowserClient()
+  const router = useRouter()
 
   useEffect(() => {
-    const storedBills = JSON.parse(localStorage.getItem('bills')) || []
-    setBills(storedBills)
-  }, [])
+    const init = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        router.replace('/user-homepage')
+      } else {
+        const storedBills = JSON.parse(localStorage.getItem('bills')) || []
+        setBills(storedBills)
+        setCheckingSession(false)
+      }
+    }
+
+    init()
+  }, [router, supabase])
+
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6 py-8 max-w-6xl mx-auto">
