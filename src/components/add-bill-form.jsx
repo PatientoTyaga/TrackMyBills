@@ -1,7 +1,9 @@
 'use client'
 
 import currencies from '@/app/utils/currencies'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase-client'
+import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs'
 
 export default function AddBillForm({ setBills }) {
   const [form, setForm] = useState({
@@ -13,23 +15,62 @@ export default function AddBillForm({ setBills }) {
     reminderDays: 3,
   })
 
+  const [session, setSession] = useState(null)
+  const supabaseClient = createPagesBrowserClient()
+
+  useEffect(() => {
+    const getSession = async () => {
+      const {
+        data: { session },
+      } = await supabaseClient.auth.getSession()
+      setSession(session)
+    }
+    getSession()
+  }, [])
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+
     const newBill = {
       ...form,
-      id: Date.now(),
       amount: parseFloat(form.amount).toFixed(2),
       isPaid: false,
     }
 
-    const stored = JSON.parse(localStorage.getItem('bills')) || []
-    const updated = [...stored, newBill]
-    localStorage.setItem('bills', JSON.stringify(updated))
-    setBills(updated)
+    if (session) {
+      // Authenticated user: insert to Supabase
+      const { error } = await supabase
+        .from('Bills')
+        .insert([{ ...newBill, user_id: session.user.id }])
+
+      if (error) {
+        console.error('Error saving to Supabase:', error.message)
+        return
+      }
+
+      // Optional: refetch or optimistically update bills state
+      const { data: updated } = await supabase
+        .from('Bills')
+        .select('*')
+        .order('due_date', { ascending: true })
+
+      setBills(updated || [])
+    } else {
+      // Unauthenticated user: save to localStorage
+      const localBill = {
+        ...newBill,
+        id: Date.now(),
+      }
+      const stored = JSON.parse(localStorage.getItem('bills')) || []
+      const updated = [...stored, localBill]
+      localStorage.setItem('bills', JSON.stringify(updated))
+      setBills(updated)
+    }
+
     setForm({
       name: '',
       dueDate: '',
