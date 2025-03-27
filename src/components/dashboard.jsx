@@ -8,15 +8,15 @@ export default function DashboardBoard({ bills }) {
   const billsPerPage = 4
 
   const unpaidUpcoming = bills
-    .filter((bill) => !bill.isPaid)
-    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+    .filter((bill) => !bill.is_paid)
+    .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))
 
   const totalPages = Math.ceil(unpaidUpcoming.length / billsPerPage)
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentPage((prev) => (prev + 1) % totalPages)
-    }, 8000)
+    }, 6000)
     return () => clearInterval(interval)
   }, [totalPages])
 
@@ -28,7 +28,7 @@ export default function DashboardBoard({ bills }) {
   return (
     <section className="space-y-6">
       {/* Airport Board */}
-      <div className="bg-black dark:bg-gray-800 text-green-500 font-mono p-6 rounded-lg shadow-md overflow-hidden h-[250px]">
+      <div className="bg-black dark:bg-gray-800 text-green-500 font-mono p-6 rounded-lg shadow-md overflow-hidden h-[280px]">
         <h2 className="text-xl font-bold mb-2 border-b border-green-500 pb-2">
           Upcoming Payments
         </h2>
@@ -47,7 +47,7 @@ export default function DashboardBoard({ bills }) {
                   <span>{bill.name}</span>
                   <span>{symbol} {bill.amount}</span>
                   <span className="text-xs">
-                    {new Date(bill.dueDate).toLocaleDateString()}
+                    {new Date(bill.due_date + 'T12:00:00').toLocaleDateString()}
                   </span>
                 </li>
               )

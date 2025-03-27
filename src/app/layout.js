@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Loading from "./loading";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +29,10 @@ export default function RootLayout({ children }) {
       >
         <Navbar />
         <main className="min-h-screen">
-          <Suspense fallback={<Loading />}>{children}</Suspense>
+          <Suspense fallback={<Loading />}>
+            {children}
+            <Toaster position="top-right" richColors />
+          </Suspense>
         </main>
         <Footer />
       </body>

@@ -1,55 +1,137 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+'use client'
 
-export default async function UserHomePage() {
-  const cookieStore = await cookies()
-  const supabase = createServerComponentClient({ cookies: () => cookieStore })
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs'
+import AddBillDialog from '@/components/add-bill-dialog'
+import DashboardBoard from '@/components/dashboard'
+import BillList from '@/components/bill-list'
+import BillCalendar from '@/components/bill-calendar'
+import { toast } from 'sonner'
+import CategorySummaryChart from '@/components/category-summary-chart'
 
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession()
+export default function UserHomePage() {
+  const [session, setSession] = useState(null)
+  const [bills, setBills] = useState([])
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
+  const supabase = createPagesBrowserClient()
 
-  if (error) {
-    console.error('Error retrieving session:', error.message)
-    return redirect('/sign-in')
+  useEffect(() => {
+    const fetchSessionAndBills = async () => {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession()
+
+      if (error || !session) {
+        router.push('/sign-in')
+        return
+      }
+
+      setSession(session)
+
+      const { data: bills, error: billsError } = await supabase
+        .from('Bills')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('due_date', { ascending: true })
+
+      if (billsError) {
+        console.error('Error fetching bills:', billsError.message)
+      } else {
+        console.log('Fetched due dates:', bills.map((b) => ({
+          id: b.id,
+          name: b.name,
+          due_date: b.due_date,
+        })))
+        setBills(bills || [])
+      }
+
+      setLoading(false)
+    }
+
+    fetchSessionAndBills()
+  }, [router, supabase])
+
+  const refreshBills = async () => {
+    if (!session) return
+    const { data: bills, error } = await supabase
+      .from('Bills')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('due_date', { ascending: true })
+
+    if (error) {
+      console.error('Failed to refresh bills:', error.message)
+    } else {
+      setBills(bills || [])
+    }
   }
 
-  if (!session) {
-    return redirect('/sign-in')
+  const handleDelete = async (id) => {
+    const { error } = await supabase.from('Bills').delete().eq('id', id)
+    if (error) {
+      console.error('Failed to delete bill:', error.message)
+      toast.error('Failed to delete bill')
+    } else {
+      toast.success('Bill removed successfully')
+      refreshBills()
+    }
   }
 
-  const { data: bills, error: billsError } = await supabase
-    .from('Bills')
-    .select('*')
-    .order('due_date', { ascending: true })
+  const handleMarkAsPaid = async (id) => {
+    const { error } = await supabase
+      .from('Bills')
+      .update({ is_paid: true })
+      .eq('id', id)
 
-  if (billsError) {
-    console.error('Error fetching bills:', billsError.message)
+    if (error) {
+      console.error('Failed to mark bill as paid:', error.message)
+      toast.error('Failed to mark bill as paid')
+    } else {
+      toast.success('Bill marked as paid')
+      refreshBills()
+    }
   }
+
+  if (loading) return <div className="p-6 text-center">Loading...</div>
+
+  const unpaidBills = bills.filter((bill) => !bill.is_paid)
+  const paidBills = bills.filter((bill) => bill.is_paid)
 
   return (
-    <div className="min-h-screen p-6">
-      <h1 className="text-2xl font-semibold mb-6">Welcome back, {session.user.email} 👋</h1>
+    <div className="min-h-screen p-6 max-w-6xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6">Welcome back, {session.user.email} 👋</h1>
 
-      <h2 className="text-lg font-medium mb-2">Your Bills:</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {/* Dashboard Summary */}
+        <DashboardBoard bills={bills} />
 
-      {bills?.length ? (
-        <ul className="space-y-3">
-          {bills.map((bill) => (
-            <li key={bill.id} className="border p-4 rounded shadow-sm">
-              <div className="font-bold text-blue-600">{bill.name}</div>
-              <div className="text-sm text-gray-600">
-                Due: {new Date(bill.due_date).toLocaleDateString()} | {bill.amount} {bill.currency}
-              </div>
-              <div className="text-sm text-gray-500">Frequency: {bill.frequency}</div>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="text-gray-500">No bills found.</p>
-      )}
+        {/* Calendar View with Hover Tooltips */}
+        <BillCalendar bills={bills} hoverable />
+      </div>
+
+      {/* Add Bill */}
+      <div className="my-6">
+        <AddBillDialog setBills={refreshBills} />
+      </div>
+
+      {/* Bills */}
+      <section className="mb-8">
+        <BillList
+          bills={bills}
+          setBills={refreshBills}
+          onDelete={handleDelete}
+          onMarkAsPaid={handleMarkAsPaid}
+        />
+      </section>
+
+      {/* bills summary chart */}
+      <section className="mb-8">
+        <CategorySummaryChart bills={bills} />
+      </section>
+
     </div>
   )
 }

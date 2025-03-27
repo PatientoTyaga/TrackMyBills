@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import currencies from '@/app/utils/currencies'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
-export default function BillList({ bills, setBills }) {
+export default function BillList({ bills, setBills, onDelete, onMarkAsPaid }) {
   const [localBills, setLocalBills] = useState(bills)
   const [selectedBill, setSelectedBill] = useState(null)
 
@@ -12,38 +12,55 @@ export default function BillList({ bills, setBills }) {
     setLocalBills(bills)
   }, [bills])
 
-  const unpaidBills = localBills.filter((bill) => !bill.isPaid)
-  const paidBills = localBills.filter((bill) => bill.isPaid)
+  const unpaidBills = localBills.filter((bill) => !bill.is_paid)
+  const paidBills = localBills.filter((bill) => bill.is_paid)
 
-  const markAsPaid = (id) => {
-    const updatedBills = localBills.map((bill) =>
-      bill.id === id ? { ...bill, isPaid: true } : bill
-    )
-    localStorage.setItem('bills', JSON.stringify(updatedBills))
-    setLocalBills(updatedBills)
+  const markAsPaid = async (id) => {
+    const isAuthenticated = typeof onMarkAsPaid === 'function'
 
-    if (setBills) {
-      setBills(updatedBills)
+    if (isAuthenticated) {
+      const updated = await onMarkAsPaid(id)
+      if (updated) setLocalBills(updated)
+    } else {
+      const updatedBills = localBills.map((bill) =>
+        bill.id === id ? { ...bill, is_paid: true } : bill
+      )
+      localStorage.setItem('bills', JSON.stringify(updatedBills))
+      setLocalBills(updatedBills)
+      if (setBills) {
+        setBills(updatedBills)
+      }
     }
 
     setSelectedBill(null)
   }
 
-  const deleteBill = (id) => {
-    const updatedBills = localBills.filter((bill) => bill.id !== id)
-    localStorage.setItem('bills', JSON.stringify(updatedBills))
-    setLocalBills(updatedBills)
+  const deleteBill = async (id) => {
+    const isAuthenticated = typeof onDelete === 'function'
 
-    if (setBills) {
-      setBills(updatedBills)
+    if (isAuthenticated) {
+      await onDelete(id)
+    } else {
+      const updatedBills = localBills.filter((bill) => bill.id !== id)
+      localStorage.setItem('bills', JSON.stringify(updatedBills))
+      setLocalBills(updatedBills)
+      if (setBills) {
+        setBills(updatedBills)
+      }
     }
   }
 
   const renderSection = (title, list, emptyMessage, isUnpaid = false) => (
     <div className="w-full">
-      <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-2">
-        {title}
+      <h3
+        className={`inline-flex items-center gap-2 text-sm font-semibold px-3 py-1 rounded-full mb-2 w-fit ${title === 'Paid Bills'
+            ? 'bg-green-100 text-green-700'
+            : 'bg-red-100 text-red-700'
+          }`}
+      >
+        {title === 'Paid Bills' ? '✅' : '⏰'} {title}
       </h3>
+
       <div className="space-y-2 overflow-y-auto max-h-80 pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
         {list.length > 0 ? (
           list.map((bill) => {
@@ -65,11 +82,11 @@ export default function BillList({ bills, setBills }) {
                 </div>
                 <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
                   <span>
-                    Due: {new Date(bill.dueDate).toLocaleDateString()}
+                    Due: {new Date(bill.due_date + 'T12:00:00').toLocaleDateString()}
                   </span>
                   <span>
-                    Status: {bill.isPaid ? 'Paid' : 'Unpaid'}
-                    {!bill.isPaid && new Date(bill.dueDate) < new Date() && (
+                    Status: {bill.is_paid ? 'Paid' : 'Unpaid'}
+                    {!bill.is_paid && new Date(bill.due_date) < new Date() && (
                       <span className="text-red-500 text-xs ml-2">(Overdue)</span>
                     )}
                   </span>
@@ -104,7 +121,7 @@ export default function BillList({ bills, setBills }) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-6 w-full">
-      {renderSection('Unpaid Bills', unpaidBills, 'No unpaid bills.', true)}
+      {renderSection('Unpaid Bills', unpaidBills, "No unpaid bills. You're all caught up! 🎉", true)}
       {renderSection('Paid Bills', paidBills, 'No paid bills.')}
 
       <Dialog open={!!selectedBill} onOpenChange={() => setSelectedBill(null)}>

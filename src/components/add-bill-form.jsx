@@ -8,11 +8,12 @@ import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs'
 export default function AddBillForm({ setBills }) {
   const [form, setForm] = useState({
     name: '',
-    dueDate: '',
+    due_date: '',
     amount: '',
     currency: 'USD',
     frequency: 'One-time',
-    reminderDays: 3,
+    reminder_days: 3,
+    category: 'Other',
   })
 
   const [session, setSession] = useState(null)
@@ -35,14 +36,19 @@ export default function AddBillForm({ setBills }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
+    // Ensure proper ISO formatting for date
+    const normalizedDate = new Date(form.due_date + 'T00:00:00')
+
     const newBill = {
       ...form,
+      due_date: new Date(form.due_date).toISOString().split('T')[0],
       amount: parseFloat(form.amount).toFixed(2),
-      isPaid: false,
+      is_paid: false,
     }
 
+
+
     if (session) {
-      // Authenticated user: insert to Supabase
       const { error } = await supabase
         .from('Bills')
         .insert([{ ...newBill, user_id: session.user.id }])
@@ -52,7 +58,6 @@ export default function AddBillForm({ setBills }) {
         return
       }
 
-      // Optional: refetch or optimistically update bills state
       const { data: updated } = await supabase
         .from('Bills')
         .select('*')
@@ -60,7 +65,6 @@ export default function AddBillForm({ setBills }) {
 
       setBills(updated || [])
     } else {
-      // Unauthenticated user: save to localStorage
       const localBill = {
         ...newBill,
         id: Date.now(),
@@ -73,11 +77,11 @@ export default function AddBillForm({ setBills }) {
 
     setForm({
       name: '',
-      dueDate: '',
+      due_date: '',
       amount: '',
       currency: 'USD',
       frequency: 'One-time',
-      reminderDays: 3,
+      reminder_days: 3,
     })
   }
 
@@ -99,8 +103,8 @@ export default function AddBillForm({ setBills }) {
         <label className="block mb-1 text-sm">Due Date</label>
         <input
           type="date"
-          name="dueDate"
-          value={form.dueDate}
+          name="due_date"
+          value={form.due_date}
           onChange={handleChange}
           className="w-full border px-3 py-2 rounded"
           required
@@ -158,8 +162,8 @@ export default function AddBillForm({ setBills }) {
           <label className="block mb-1 text-sm">Reminder Days</label>
           <input
             type="number"
-            name="reminderDays"
-            value={form.reminderDays}
+            name="reminder_days"
+            value={form.reminder_days}
             onChange={handleChange}
             className="w-full border px-3 py-2 rounded"
             min="0"
@@ -167,6 +171,22 @@ export default function AddBillForm({ setBills }) {
         </div>
       </div>
 
+      <div>
+        <label className="block mb-1 text-sm">Category</label>
+        <select
+          name="category"
+          value={form.category}
+          onChange={handleChange}
+          className="w-full border px-3 py-2 rounded"
+        >
+          {['Rent', 'Utilities', 'Subscriptions', 'Groceries', 'Insurance', 'Other'].map((cat) => (
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
+          ))}
+        </select>
+      </div>
+      
       <button
         type="submit"
         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
