@@ -144,16 +144,18 @@ export default function BillList({ bills, setBills, onDelete, onMarkAsPaid, onEd
                     >
                       Remove Bill
                     </button>
-                    <button
-                      onClick={() => {
-                        setEditingBill(bill)
-                        setEditedAmount(bill.amount.toString())
-                        setEditedDueDate(bill.due_date)
-                      }}
-                      className="text-yellow-600 hover:underline"
-                    >
-                      Edit
-                    </button>
+                    {isUnpaid && (
+                      <button
+                        onClick={() => {
+                          setEditingBill(bill)
+                          setEditedAmount(bill.amount.toString())
+                          setEditedDueDate(bill.due_date)
+                        }}
+                        className="text-yellow-600 hover:underline"
+                      >
+                        Edit
+                      </button>
+                    )}
                   </div>
                   <span className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded">
                     {bill.frequency}
