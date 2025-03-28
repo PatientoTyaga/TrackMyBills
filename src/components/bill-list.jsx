@@ -4,16 +4,17 @@ import { useEffect, useState } from 'react'
 import currencies from '@/app/utils/currencies'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
-export default function BillList({ bills, setBills, onDelete, onMarkAsPaid }) {
+export default function BillList({ bills, setBills, onDelete, onMarkAsPaid, onEdit }) {
   const [localBills, setLocalBills] = useState(bills)
   const [selectedBill, setSelectedBill] = useState(null)
+  const [editingBill, setEditingBill] = useState(null)
+  const [filter, setFilter] = useState('All')
+  const [editedAmount, setEditedAmount] = useState('')
+  const [editedDueDate, setEditedDueDate] = useState('')
 
   useEffect(() => {
     setLocalBills(bills)
   }, [bills])
-
-  const unpaidBills = localBills.filter((bill) => !bill.is_paid)
-  const paidBills = localBills.filter((bill) => bill.is_paid)
 
   const markAsPaid = async (id) => {
     const isAuthenticated = typeof onMarkAsPaid === 'function'
@@ -50,16 +51,52 @@ export default function BillList({ bills, setBills, onDelete, onMarkAsPaid }) {
     }
   }
 
+  const editBill = async () => {
+    if (!editedAmount || isNaN(editedAmount) || !editedDueDate) return
+    const isAuthenticated = typeof onEdit === 'function'
+    const updatedAmount = parseFloat(editedAmount)
+
+    if (isAuthenticated) {
+      const updated = await onEdit(editingBill.id, updatedAmount, editedDueDate)
+      if (updated) setLocalBills(updated)
+    } else {
+      const updatedBills = localBills.map((bill) =>
+        bill.id === editingBill.id
+          ? { ...bill, amount: updatedAmount, due_date: editedDueDate }
+          : bill
+      )
+      localStorage.setItem('bills', JSON.stringify(updatedBills))
+      setLocalBills(updatedBills)
+      if (setBills) {
+        setBills(updatedBills)
+      }
+    }
+
+    setEditingBill(null)
+    setEditedAmount('')
+    setEditedDueDate('')
+  }
+
+  const filteredBills = localBills.filter((bill) => {
+    if (filter === 'All') return true
+    return bill.frequency === filter
+  })
+
+  const unpaidBills = filteredBills.filter((bill) => !bill.is_paid)
+  const paidBills = filteredBills.filter((bill) => bill.is_paid)
+
   const renderSection = (title, list, emptyMessage, isUnpaid = false) => (
     <div className="w-full">
-      <h3
-        className={`inline-flex items-center gap-2 text-sm font-semibold px-3 py-1 rounded-full mb-2 w-fit ${title === 'Paid Bills'
+      <div className="flex justify-between items-center mb-2">
+        <h3
+          className={`inline-flex items-center gap-2 text-sm font-semibold px-3 py-1 rounded-full w-fit ${title === 'Paid Bills'
             ? 'bg-green-100 text-green-700'
             : 'bg-red-100 text-red-700'
-          }`}
-      >
-        {title === 'Paid Bills' ? '✅' : '⏰'} {title}
-      </h3>
+            }`}
+        >
+          {title === 'Paid Bills' ? '✅' : '⏰'} {title}
+        </h3>
+      </div>
 
       <div className="space-y-2 overflow-y-auto max-h-80 pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
         {list.length > 0 ? (
@@ -91,21 +128,36 @@ export default function BillList({ bills, setBills, onDelete, onMarkAsPaid }) {
                     )}
                   </span>
                 </div>
-                <div className="flex gap-4 mt-2 text-sm">
-                  {isUnpaid && (
+                <div className="flex justify-between items-center mt-2 text-sm">
+                  <div className="flex gap-4">
+                    {isUnpaid && (
+                      <button
+                        onClick={() => setSelectedBill(bill)}
+                        className="text-blue-600 hover:underline"
+                      >
+                        Mark as Paid
+                      </button>
+                    )}
                     <button
-                      onClick={() => setSelectedBill(bill)}
-                      className="text-blue-600 hover:underline"
+                      onClick={() => deleteBill(bill.id)}
+                      className="text-red-600 hover:underline"
                     >
-                      Mark as Paid
+                      Remove Bill
                     </button>
-                  )}
-                  <button
-                    onClick={() => deleteBill(bill.id)}
-                    className="text-red-600 hover:underline"
-                  >
-                    Remove Bill
-                  </button>
+                    <button
+                      onClick={() => {
+                        setEditingBill(bill)
+                        setEditedAmount(bill.amount.toString())
+                        setEditedDueDate(bill.due_date)
+                      }}
+                      className="text-yellow-600 hover:underline"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  <span className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded">
+                    {bill.frequency}
+                  </span>
                 </div>
               </div>
             )
@@ -120,10 +172,25 @@ export default function BillList({ bills, setBills, onDelete, onMarkAsPaid }) {
   )
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-6 w-full">
-      {renderSection('Unpaid Bills', unpaidBills, "No unpaid bills. You're all caught up! 🎉", true)}
-      {renderSection('Paid Bills', paidBills, 'No paid bills.')}
+    <div className="w-full">
+      <div className="flex justify-end mb-4">
+        <select
+          className="text-sm border px-2 py-1 rounded shadow dark:bg-gray-800 dark:text-white"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        >
+          <option value="All">All</option>
+          <option value="One-time">One-time</option>
+          <option value="Monthly">Monthly</option>
+          <option value="Yearly">Yearly</option>
+        </select>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-6">
+        {renderSection('Unpaid Bills', unpaidBills, "No unpaid bills. You're all caught up! 🎉", true)}
+        {renderSection('Paid Bills', paidBills, 'No paid bills.')}
+      </div>
 
+      {/* Mark as Paid Dialog */}
       <Dialog open={!!selectedBill} onOpenChange={() => setSelectedBill(null)}>
         <DialogContent>
           <DialogHeader>
@@ -144,6 +211,47 @@ export default function BillList({ bills, setBills, onDelete, onMarkAsPaid }) {
               className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
             >
               Confirm
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editingBill} onOpenChange={() => setEditingBill(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Bill</DialogTitle>
+          </DialogHeader>
+          <div className="mb-4">
+            <label className="block text-sm mb-1 text-gray-700 dark:text-gray-300">New Amount</label>
+            <input
+              type="number"
+              className="w-full px-3 py-2 border rounded dark:bg-gray-800 dark:text-white"
+              value={editedAmount}
+              onChange={(e) => setEditedAmount(e.target.value)}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm mb-1 text-gray-700 dark:text-gray-300">New Due Date</label>
+            <input
+              type="date"
+              className="w-full px-3 py-2 border rounded dark:bg-gray-800 dark:text-white"
+              value={editedDueDate}
+              onChange={(e) => setEditedDueDate(e.target.value)}
+            />
+          </div>
+          <div className="flex justify-end gap-4">
+            <button
+              onClick={() => setEditingBill(null)}
+              className="px-4 py-2 text-sm bg-gray-300 dark:bg-gray-700 rounded hover:bg-gray-400 dark:hover:bg-gray-600"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={editBill}
+              className="px-4 py-2 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700"
+            >
+              Save
             </button>
           </div>
         </DialogContent>

@@ -9,6 +9,7 @@ import BillList from '@/components/bill-list'
 import BillCalendar from '@/components/bill-calendar'
 import { toast } from 'sonner'
 import CategorySummaryChart from '@/components/category-summary-chart'
+import MonthlyTrendChart from '@/components/monthly-trend-chart'
 
 export default function UserHomePage() {
   const [session, setSession] = useState(null)
@@ -95,6 +96,24 @@ export default function UserHomePage() {
     }
   }
 
+  const handleEdit = async (id, newAmount, newDueDate) => {
+    const { error } = await supabase
+      .from('Bills')
+      .update({
+        amount: parseFloat(newAmount),
+        due_date: newDueDate,
+      })
+      .eq('id', id)
+
+    if (error) {
+      console.error('Failed to update bill:', error.message)
+      toast.error('Failed to update bill')
+    } else {
+      toast.success('Bill updated successfully')
+      refreshBills()
+    }
+  }
+
   if (loading) return <div className="p-6 text-center">Loading...</div>
 
   const unpaidBills = bills.filter((bill) => !bill.is_paid)
@@ -103,6 +122,46 @@ export default function UserHomePage() {
   return (
     <div className="min-h-screen p-6 max-w-6xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">Welcome back, {session.user.email} 👋</h1>
+
+      {/* 🔔 Upcoming Reminders */}
+      {unpaidBills.some((bill) => {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        const dueDate = new Date(bill.due_date + 'T00:00:00')
+        const daysLeft = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24))
+        return daysLeft >= 0 && daysLeft <= 3
+      }) && (
+          <div className="mb-6 bg-yellow-50 border border-yellow-300 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100 dark:border-yellow-700 px-4 py-3 rounded-lg">
+            {unpaidBills
+              .filter((bill) => {
+                const today = new Date()
+                today.setHours(0, 0, 0, 0)
+                const dueDate = new Date(bill.due_date + 'T00:00:00')
+                const daysLeft = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24))
+                return daysLeft >= 0 && daysLeft <= 3
+              })
+              .slice(0, 3)
+              .map((bill) => {
+                const today = new Date()
+                today.setHours(0, 0, 0, 0)
+                const dueDate = new Date(bill.due_date + 'T00:00:00')
+                const daysLeft = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24))
+                const dueText =
+                  daysLeft === 0
+                    ? 'is due today!'
+                    : daysLeft === 1
+                      ? 'is due tomorrow!'
+                      : `is due in ${daysLeft} days!`
+
+                return (
+                  <div key={bill.id} className="flex items-center gap-2 mb-1 text-sm">
+                    <span>🔔</span>
+                    <span className="font-medium">{bill.name}</span> {dueText}
+                  </div>
+                )
+              })}
+          </div>
+        )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* Dashboard Summary */}
@@ -124,12 +183,18 @@ export default function UserHomePage() {
           setBills={refreshBills}
           onDelete={handleDelete}
           onMarkAsPaid={handleMarkAsPaid}
+          onEdit={handleEdit}
         />
       </section>
 
       {/* bills summary chart */}
       <section className="mb-8">
         <CategorySummaryChart bills={bills} />
+      </section>
+
+      {/* monthly summary chart */}
+      <section className="mb-8">
+        <MonthlyTrendChart bills={bills} />
       </section>
 
     </div>
