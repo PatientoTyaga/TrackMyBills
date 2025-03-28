@@ -24,7 +24,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    router.push('/sign-in') // let middleware handle redirecting
+    router.push('/sign-in')
   }
 
   return (
@@ -41,7 +41,11 @@ export default function Navbar() {
 
           {session ? (
             <>
-              <span className="text-sm text-gray-600 dark:text-gray-300">{session.user.email}</span>
+              {/* Avatar linking to profile */}
+              <Link href="/profile" className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-600 text-white text-sm font-semibold hover:opacity-90 transition">
+                {session.user.email?.charAt(0).toUpperCase()}
+              </Link>
+
               <button onClick={handleLogout} className="text-sm text-red-600 hover:underline">
                 Log Out
               </button>
