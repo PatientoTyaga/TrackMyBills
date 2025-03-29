@@ -27,19 +27,22 @@ export default function ProfilePage() {
     if (!session) return
 
     try {
-      // Step 1: Delete all bills for the user
-      const { error: deleteError } = await supabase
-        .from('Bills')
-        .delete()
-        .eq('user_id', session.user.id)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/delete-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`, // Auth token to verify identity
+        },
+        body: JSON.stringify({ user_id: session.user.id }),
+      })
 
-      if (deleteError) throw deleteError
+      const result = await response.json()
 
-      // Step 2: Delete user from auth
-      const { error: userError } = await supabase.auth.admin.deleteUser(session.user.id)
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete user')
+      }
 
-      if (userError) throw userError
-
+      await supabase.auth.signOut()
       toast.success('Account deleted successfully')
       router.push('/goodbye')
     } catch (error) {
