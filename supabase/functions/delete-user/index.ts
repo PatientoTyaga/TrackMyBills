@@ -4,33 +4,32 @@
 import { serve } from 'https://deno.land/std@0.192.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+// Utility to wrap responses with CORS
+function withCORS(body: any, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*', // Or restrict to your domain
+      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    },
+  })
+}
+
+// Handle preflight requests
 serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return withCORS({}, 200)
+  }
+
   try {
-    const origin = req.headers.get('Origin') ?? ''
-    const allowedOrigins = ['http://localhost:3000', 'https://trackmybills.vercel.app']
-
-    if (!allowedOrigins.includes(origin)) {
-      return new Response(JSON.stringify({ error: 'Forbidden origin' }), {
-        status: 403,
-        headers: {
-          'Access-Control-Allow-Origin': 'null',
-          'Content-Type': 'application/json',
-        },
-      })
-    }
-
     const { user_id } = await req.json()
     const authHeader = req.headers.get('Authorization')
     const token = authHeader?.split(' ')[1]
 
     if (!user_id || !token) {
-      return new Response(JSON.stringify({ error: 'Missing user ID or token' }), {
-        status: 400,
-        headers: {
-          'Access-Control-Allow-Origin': origin,
-          'Content-Type': 'application/json',
-        },
-      })
+      return withCORS({ error: 'Missing user ID or token' }, 400)
     }
 
     const supabase = createClient(
@@ -44,13 +43,7 @@ serve(async (req) => {
     } = await supabase.auth.getUser(token)
 
     if (userError || user.id !== user_id) {
-      return new Response(JSON.stringify({ error: 'Unauthorized request' }), {
-        status: 401,
-        headers: {
-          'Access-Control-Allow-Origin': origin,
-          'Content-Type': 'application/json',
-        },
-      })
+      return withCORS({ error: 'Unauthorized request' }, 401)
     }
 
     const { error: billsError } = await supabase
@@ -59,42 +52,18 @@ serve(async (req) => {
       .eq('user_id', user_id)
 
     if (billsError) {
-      return new Response(JSON.stringify({ error: billsError.message }), {
-        status: 500,
-        headers: {
-          'Access-Control-Allow-Origin': origin,
-          'Content-Type': 'application/json',
-        },
-      })
+      return withCORS({ error: billsError.message }, 500)
     }
 
     const { error: deleteError } = await supabase.auth.admin.deleteUser(user_id)
 
     if (deleteError) {
-      return new Response(JSON.stringify({ error: deleteError.message }), {
-        status: 500,
-        headers: {
-          'Access-Control-Allow-Origin': origin,
-          'Content-Type': 'application/json',
-        },
-      })
+      return withCORS({ error: deleteError.message }, 500)
     }
 
-    return new Response(JSON.stringify({ message: 'User deleted successfully' }), {
-      status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': origin,
-        'Content-Type': 'application/json',
-      },
-    })
+    return withCORS({ message: 'User deleted successfully' }, 200)
   } catch (err) {
     console.error('Unexpected error in Edge Function:', err)
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*', // fallback in case Origin is not known
-        'Content-Type': 'application/json',
-      },
-    })
+    return withCORS({ error: 'Internal server error' }, 500)
   }
 })
