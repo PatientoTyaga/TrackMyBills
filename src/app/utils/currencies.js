@@ -1,10 +1,10 @@
 // utils/currencies.js
 
 const currencies = [
+  { code: "CAD", name: "Canadian Dollar", flag: "🇨🇦", symbol: "$" },
   { code: "USD", name: "United States Dollar", flag: "🇺🇸", symbol: "$" },
   { code: "EUR", name: "Euro", flag: "🇪🇺", symbol: "€" },
   { code: "GBP", name: "British Pound", flag: "🇬🇧", symbol: "£" },
-  { code: "CAD", name: "Canadian Dollar", flag: "🇨🇦", symbol: "$" },
   { code: "AUD", name: "Australian Dollar", flag: "🇦🇺", symbol: "$" },
   { code: "JPY", name: "Japanese Yen", flag: "🇯🇵", symbol: "¥" },
   { code: "CNY", name: "Chinese Yuan", flag: "🇨🇳", symbol: "¥" },

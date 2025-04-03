@@ -12,7 +12,7 @@ import {
     isSameMonth
 } from 'date-fns'
 import { CalendarDays } from 'lucide-react'
-import CategoryTag from './category-tag'
+import CategoryTag from '../category/category-tag'
 
 export default function BillCalendar({ bills }) {
     const today = new Date()
@@ -106,12 +106,12 @@ export default function BillCalendar({ bills }) {
                         >
                             <div
                                 className={`py-1 px-2 rounded cursor-default flex items-center justify-center gap-1 ${allPaid
-                                        ? 'bg-green-100 text-green-800 font-semibold'
-                                        : hasBills
-                                            ? 'bg-blue-100 text-blue-800 font-semibold'
-                                            : isPast
-                                                ? 'text-gray-400 dark:text-gray-500'
-                                                : 'text-gray-600 dark:text-gray-300'
+                                    ? 'bg-green-100 text-green-800 font-semibold'
+                                    : hasBills
+                                        ? 'bg-blue-100 text-blue-800 font-semibold'
+                                        : isPast
+                                            ? 'text-gray-400 dark:text-gray-500'
+                                            : 'text-gray-600 dark:text-gray-300'
                                     }`}
                             >
                                 {format(date, 'd')}

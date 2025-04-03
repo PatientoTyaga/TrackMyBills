@@ -1,32 +1,44 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import DashboardBoard from '@/components/dashboard'
-import BillList from '@/components/bill-list'
-import AddBillDialog from '@/components/add-bill-dialog'
+import DashboardBoard from '@/components/dashboard/dashboard'
 import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
+import AddBillDialog from '@/components/add-bill/add-bill-dialog'
+import BillList from '@/components/bill/bill-list'
 
 export default function Home() {
   const [bills, setBills] = useState([])
   const [checkingSession, setCheckingSession] = useState(true)
   const supabase = createPagesBrowserClient()
   const router = useRouter()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
+  // Checks for session and loads either Supabase or localStorage bills
   useEffect(() => {
     const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        router.replace('/user-homepage')
-      } else {
-        const storedBills = JSON.parse(localStorage.getItem('bills')) || []
-        setBills(storedBills)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+
+        if (session) {
+          setIsAuthenticated(true)
+          router.replace('/user-homepage')
+        } else {
+          const storedBills = JSON.parse(localStorage.getItem('bills')) || []
+          setBills(storedBills)
+          setIsAuthenticated(false)
+          setCheckingSession(false)
+        }
+
+      } catch (err) {
+        console.error("❌ Error in useEffect init:", err)
         setCheckingSession(false)
       }
     }
 
     init()
   }, [router, supabase])
+
 
   if (checkingSession) {
     return (

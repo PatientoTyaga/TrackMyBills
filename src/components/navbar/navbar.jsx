@@ -1,15 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase-client'
-import useUserSession from '@/hooks/use-user-session'
+import { useState, useEffect } from 'react'
+import { signOut } from '@/app/actions/server-actions'
 
-export default function Navbar() {
+export default function Navbar({ user }) {
   const [isDark, setIsDark] = useState(false)
   const router = useRouter()
-  const session = useUserSession()
 
   useEffect(() => {
     const root = document.documentElement
@@ -22,15 +20,10 @@ export default function Navbar() {
     setIsDark(!isDark)
   }
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/sign-in')
-  }
-
   return (
     <nav className="w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
-        <Link href={session ? '/user-homepage' : '/'}>
+        <Link href={user ? '/user-homepage' : '/'}>
           <span className="text-xl font-bold text-blue-600">TrackMyBills</span>
         </Link>
 
@@ -39,16 +32,21 @@ export default function Navbar() {
             {isDark ? 'Light Mode' : 'Dark Mode'}
           </button>
 
-          {session ? (
+          {user ? (
             <>
               {/* Avatar linking to profile */}
               <Link href="/profile" className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-600 text-white text-sm font-semibold hover:opacity-90 transition">
-                {session.user.email?.charAt(0).toUpperCase()}
+                {user.email?.charAt(0).toUpperCase()}
               </Link>
 
-              <button onClick={handleLogout} className="text-sm text-red-600 hover:underline">
-                Log Out
-              </button>
+              <form action={signOut}>
+                <button
+                  type="submit"
+                  className="text-sm text-red-600 hover:underline"
+                >
+                  Log Out
+                </button>
+              </form>
             </>
           ) : (
             <>

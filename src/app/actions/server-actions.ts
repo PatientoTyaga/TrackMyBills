@@ -1,0 +1,208 @@
+'use server'
+
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/utils/supabase/server'
+import { cookies } from 'next/headers'
+
+async function getAuthenticatedUser() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    console.error('[AUTH ERROR]:', error?.message || 'No user found')
+    return null
+  }
+
+  return user
+}
+
+export async function emailLogin(formData: FormData) {
+  const supabase = await createClient()
+  const cookieStore = await cookies()
+
+  const data = {
+    email: formData.get('email') as string,
+    password: formData.get('password') as string,
+  }
+
+  const { error } = await supabase.auth.signInWithPassword(data)
+
+  if (error) {
+    console.error('[LOGIN ERROR]:', error.message)
+    ;(await cookieStore).set('flash_error', 'Invalid email or password')
+    redirect('/sign-in')
+  }
+
+  revalidatePath('/', 'layout')
+  redirect('/user-homepage')
+}
+
+export async function signup(formData: FormData) {
+  const supabase = await createClient()
+  const cookieStore = await cookies()
+
+  const data = {
+    email: formData.get('email') as string,
+    password: formData.get('password') as string,
+  }
+
+  const { error } = await supabase.auth.signUp(data)
+
+  if (error) {
+    console.error('[SIGNUP ERROR]:', error.message)
+    ;(await cookieStore).set('flash_error', 'Error signing up. Please try again.')
+    redirect('/sign-up')
+  }
+
+  revalidatePath('/', 'layout')
+  redirect('/sign-in')
+}
+
+export async function signOut() {
+  const supabase = await createClient()
+  const user = await getAuthenticatedUser()
+
+  if (!user) {
+    return { success: false, message: 'You are not signed in.' }
+  }
+
+  await supabase.auth.signOut()
+  revalidatePath('/', 'layout')
+  redirect('/sign-in')
+}
+
+export async function deleteUserAccount(userId: string) {
+  try {
+    const supabase = await createClient()
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    const access_token = sessionData?.session?.access_token
+
+    if (!access_token || sessionError) {
+      console.error('[DELETE ACCOUNT ERROR]: Unauthorized or session error')
+      return { success: false, error: 'Unauthorized: No session' }
+    }
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/delete-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${access_token}`,
+      },
+      body: JSON.stringify({ user_id: userId }),
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      console.error('[DELETE ACCOUNT ERROR]:', result.error)
+      return { success: false, error: result.error || 'Failed to delete user' }
+    }
+
+    await supabase.auth.signOut()
+    return { success: true }
+  } catch (err: any) {
+    console.error('[DELETE ACCOUNT ERROR]:', err.message)
+    return { success: false, error: err.message }
+  }
+}
+
+export async function addBill(prevState: any, formData: FormData) {
+  const supabase = await createClient()
+  const user = await getAuthenticatedUser()
+
+  if (!user) {
+    return { success: false, message: 'You must be signed in to add a bill.' }
+  }
+
+  const bill = {
+    name: formData.get('name'),
+    due_date: formData.get('due_date'),
+    amount: parseFloat(formData.get('amount') as string),
+    currency: formData.get('currency'),
+    frequency: formData.get('frequency'),
+    reminder_days: parseInt(formData.get('reminder_days') as string),
+    category: formData.get('category'),
+    is_paid: false,
+    user_id: user.id,
+  }
+
+  const { error } = await supabase.from('Bills').insert([bill])
+
+  if (error) {
+    console.error('[ADD BILL ERROR]:', error.message)
+    return { success: false, message: 'Failed to add bill: ' + error.message }
+  }
+
+  revalidatePath('/user-homepage')
+  return { success: true, message: 'Bill added successfully!' }
+}
+
+export async function deleteBill(id: string) {
+  const supabase = await createClient()
+  const user = await getAuthenticatedUser()
+
+  if (!user) return { success: false, message: 'Unauthorized' }
+
+  const { error } = await supabase
+    .from('Bills')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id)
+
+  if (error) {
+    console.error('[DELETE BILL ERROR]:', error.message)
+    return { success: false, message: 'Failed to delete bill: ' + error.message }
+  }
+
+  revalidatePath('/user-homepage')
+  return { success: true }
+}
+
+export async function markBillAsPaid(id: string) {
+  const supabase = await createClient()
+  const user = await getAuthenticatedUser()
+
+  if (!user) return { success: false, message: 'Unauthorized' }
+
+  const { error } = await supabase
+    .from('Bills')
+    .update({ is_paid: true })
+    .eq('id', id)
+    .eq('user_id', user.id)
+
+  if (error) {
+    console.error('[MARK BILL PAID ERROR]:', error.message)
+    return { success: false, message: 'Failed to mark bill as paid: ' + error.message }
+  }
+
+  revalidatePath('/user-homepage')
+  return { success: true }
+}
+
+export async function editBill(id: string, amount: string, due_date: string) {
+  const supabase = await createClient()
+  const user = await getAuthenticatedUser()
+
+  if (!user) return { success: false, message: 'Unauthorized' }
+
+  const { error } = await supabase
+    .from('Bills')
+    .update({
+      amount: parseFloat(amount),
+      due_date,
+    })
+    .eq('id', id)
+    .eq('user_id', user.id)
+
+  if (error) {
+    console.error('[EDIT BILL ERROR]:', error.message)
+    return { success: false, message: 'Failed to edit bill: ' + error.message }
+  }
+
+  revalidatePath('/user-homepage')
+  return { success: true }
+}
