@@ -123,7 +123,7 @@ export default function BillList({ bills, setBills, onDelete, onMarkAsPaid, onEd
                   </span>
                   <span>
                     Status: {bill.is_paid ? 'Paid' : 'Unpaid'}
-                    {!bill.is_paid && new Date(bill.due_date) < new Date() && (
+                    {!bill.is_paid && new Date(bill.due_date + 'T00:00:00') < new Date(new Date().setHours(0, 0, 0, 0)) && (
                       <span className="text-red-500 text-xs ml-2">(Overdue)</span>
                     )}
                   </span>
