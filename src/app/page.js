@@ -6,6 +6,7 @@ import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
 import AddBillDialog from '@/components/add-bill/add-bill-dialog'
 import BillList from '@/components/bill/bill-list'
+import BillDueAlert from '@/components/alerts/bill-due-alert'
 
 export default function Home() {
   const [bills, setBills] = useState([])
@@ -52,6 +53,8 @@ export default function Home() {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6 py-8 max-w-6xl mx-auto">
       {/* Welcome Section */}
       <section className="flex flex-col justify-center space-y-6">
+
+        <BillDueAlert bills={bills} />
         <h1 className="text-4xl font-bold leading-tight">
           Welcome to <span className="text-blue-600">TrackMyBills</span>
         </h1>

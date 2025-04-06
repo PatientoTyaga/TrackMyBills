@@ -31,18 +31,11 @@ export default async function UserHomePage() {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  const reminders = unpaidBills.filter((bill) => {
-    const dueDate = new Date(bill.due_date + 'T00:00:00')
-    const daysBeforeDue = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24))
-    return daysBeforeDue >= 0 && daysBeforeDue <= (bill.reminder_days || 0)
-  })
-
-
   return (
     <div className="min-h-screen p-6 max-w-6xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">Welcome back, {user.email} 👋</h1>
 
-      <BillDueAlert bills={reminders} />
+      <BillDueAlert bills={unpaidBills} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <DashboardBoard bills={bills} />
