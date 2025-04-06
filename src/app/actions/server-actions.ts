@@ -168,15 +168,48 @@ export async function markBillAsPaid(id: string) {
 
   if (!user) return { success: false, message: 'Unauthorized' }
 
-  const { error } = await supabase
+  const { data: billData, error: fetchError } = await supabase
+    .from('Bills')
+    .select('*')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .single()
+
+  if (fetchError || !billData) {
+    console.error('[FETCH BILL ERROR]:', fetchError?.message || 'Bill not found')
+    return { success: false, message: 'Bill not found or unauthorized' }
+  }
+
+  const { error: updateError } = await supabase
     .from('Bills')
     .update({ is_paid: true })
     .eq('id', id)
-    .eq('user_id', user.id)
 
-  if (error) {
-    console.error('[MARK BILL PAID ERROR]:', error.message)
-    return { success: false, message: 'Failed to mark bill as paid: ' + error.message }
+  if (updateError) {
+    console.error('[MARK BILL PAID ERROR]:', updateError.message)
+    return { success: false, message: 'Failed to mark bill as paid: ' + updateError.message }
+  }
+
+  // Handle recurrence
+  if (billData.frequency === 'Monthly' || billData.frequency === 'Yearly') {
+    const nextDueDate = new Date(billData.due_date)
+    if (billData.frequency === 'Monthly') {
+      nextDueDate.setMonth(nextDueDate.getMonth() + 1)
+    } else {
+      nextDueDate.setFullYear(nextDueDate.getFullYear() + 1)
+    }
+
+    const newBill = {
+      ...billData,
+      due_date: nextDueDate.toISOString().split('T')[0],
+      is_paid: false,
+    }
+    delete newBill.id
+
+    const { error: insertError } = await supabase.from('Bills').insert([newBill])
+    if (insertError) {
+      console.error('[INSERT NEXT BILL ERROR]:', insertError.message)
+    }
   }
 
   revalidatePath('/user-homepage')
