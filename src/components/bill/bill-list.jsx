@@ -23,14 +23,45 @@ export default function BillList({ bills, setBills, onDelete, onMarkAsPaid, onEd
       const updated = await onMarkAsPaid(id)
       if (updated) setLocalBills(updated)
     } else {
-      const updatedBills = localBills.map((bill) =>
-        bill.id === id ? { ...bill, is_paid: true } : bill
-      )
+      const updatedBills = []
+
+      for (const bill of localBills) {
+        if (bill.id === id) {
+          const updatedBill = { ...bill, is_paid: true }
+          updatedBills.push(updatedBill)
+
+          // Handle recurrence
+          if (bill.frequency === 'Monthly' || bill.frequency === 'Yearly') {
+            const dueDate = new Date(bill.due_date + 'T00:00:00')
+            const nextDueDate = new Date(dueDate)
+
+            if (bill.frequency === 'Monthly') nextDueDate.setMonth(nextDueDate.getMonth() + 1)
+            if (bill.frequency === 'Yearly') nextDueDate.setFullYear(nextDueDate.getFullYear() + 1)
+
+            const nextDueDateStr = nextDueDate.toISOString().split('T')[0]
+
+            const alreadyExists = localBills.some(
+              (b) => b.name === bill.name && b.due_date === nextDueDateStr
+            )
+
+            if (!alreadyExists) {
+              const newRecurring = {
+                ...bill,
+                is_paid: false,
+                due_date: nextDueDateStr,
+                id: Date.now() + Math.random(),
+              }
+              updatedBills.push(newRecurring)
+            }
+          }
+        } else {
+          updatedBills.push(bill)
+        }
+      }
+
       localStorage.setItem('bills', JSON.stringify(updatedBills))
       setLocalBills(updatedBills)
-      if (setBills) {
-        setBills(updatedBills)
-      }
+      if (setBills) setBills(updatedBills)
     }
 
     setSelectedBill(null)
