@@ -33,7 +33,7 @@ export default async function UserHomePage() {
 
   return (
     <div className="min-h-screen p-6 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Welcome back, {user.email} 👋</h1>
+      <h1 className="text-3xl font-bold mb-6">Welcome back, {user.user_metadata.username} 👋</h1>
 
       <BillDueAlert bills={unpaidBills} />
 

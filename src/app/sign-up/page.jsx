@@ -3,7 +3,6 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase-client'
 import { signup } from '../actions/server-actions'
 import { SubmitButton } from '@/components/submit-btn'
 
@@ -37,6 +36,14 @@ export default function SignUpPage() {
         <h1 className="text-2xl font-bold mb-4 text-center text-blue-600">Sign Up</h1>
 
         {message && <p className="text-red-500 text-sm mb-4 text-center">{message}</p>}
+
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          className="w-full px-4 py-2 mb-4 border rounded bg-gray-50 dark:bg-gray-700 text-black dark:text-white"
+          required
+        />
 
         <input
           type="email"

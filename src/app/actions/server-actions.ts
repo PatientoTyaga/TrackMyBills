@@ -33,7 +33,7 @@ export async function emailLogin(formData: FormData) {
 
   if (error) {
     console.error('[LOGIN ERROR]:', error.message)
-    ;(await cookieStore).set('flash_error', 'Invalid email or password')
+      ; (await cookieStore).set('flash_error', 'Invalid email or password')
     redirect('/sign-in')
   }
 
@@ -45,16 +45,21 @@ export async function signup(formData: FormData) {
   const supabase = await createClient()
   const cookieStore = await cookies()
 
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  }
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+  const username = formData.get('username') as string
 
-  const { error } = await supabase.auth.signUp(data)
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { username }, // 👈 save it to metadata
+    },
+  })
 
   if (error) {
     console.error('[SIGNUP ERROR]:', error.message)
-    ;(await cookieStore).set('flash_error', 'Error signing up. Please try again.')
+      ; (await cookieStore).set('flash_error', 'Error signing up. Please try again.')
     redirect('/sign-up')
   }
 
