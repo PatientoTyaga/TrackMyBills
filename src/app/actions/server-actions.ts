@@ -53,7 +53,7 @@ export async function signup(formData: FormData) {
     email,
     password,
     options: {
-      data: { username }, // 👈 save it to metadata
+      data: { username },
     },
   })
 
@@ -72,7 +72,7 @@ export async function signOut() {
   const user = await getAuthenticatedUser()
 
   if (!user) {
-    return { success: false, message: 'You are not signed in.' }
+    return { success: false, message: 'Unauthorized' }
   }
 
   await supabase.auth.signOut()
@@ -88,7 +88,11 @@ export async function deleteUserAccount(userId: string) {
 
     if (!access_token || sessionError) {
       console.error('[DELETE ACCOUNT ERROR]: Unauthorized or session error')
-      return { success: false, error: 'Unauthorized: No session' }
+      return {
+        success: false,
+        error: 'You are not logged in. Please log in to delete your account.',
+        reason: 'not_logged_in',
+      }
     }
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/delete-user`, {
@@ -103,15 +107,24 @@ export async function deleteUserAccount(userId: string) {
     const result = await response.json()
 
     if (!response.ok) {
-      console.error('[DELETE ACCOUNT ERROR]:', result.error)
-      return { success: false, error: result.error || 'Failed to delete user' }
+      const isUnauthorized = result.error?.toLowerCase().includes('unauthorized')
+
+      return {
+        success: false,
+        error: result.error || 'Failed to delete user',
+        reason: isUnauthorized ? 'user_deleted_or_invalid_token' : 'other_error',
+      }
     }
 
     await supabase.auth.signOut()
     return { success: true }
   } catch (err: any) {
     console.error('[DELETE ACCOUNT ERROR]:', err.message)
-    return { success: false, error: err.message }
+    return {
+      success: false,
+      error: err.message || 'Something went wrong',
+      reason: 'network_or_unknown',
+    }
   }
 }
 
@@ -120,7 +133,7 @@ export async function addBill(prevState: any, formData: FormData) {
   const user = await getAuthenticatedUser()
 
   if (!user) {
-    return { success: false, message: 'You must be signed in to add a bill.' }
+    return { success: false, message: 'Unauthorized' }
   }
 
   const bill = {
@@ -243,4 +256,22 @@ export async function editBill(id: string, amount: string, due_date: string) {
 
   revalidatePath('/user-homepage')
   return { success: true }
+}
+
+export async function updateUsername(newUsername: string) {
+  const supabase = await createClient()
+  const user = await getAuthenticatedUser()
+
+  if (!user) return { success: false, message: 'Unauthorized' }
+
+  const { error } = await supabase.auth.updateUser({
+    data: { username: newUsername },
+  })
+
+  if (error) {
+    console.error('[UPDATE USERNAME ERROR]:', error.message)
+    return { success: false, message: 'Failed to update username: ' + error.message }
+  }
+
+  return { success: true, message: 'Username updated successfully!' }
 }
