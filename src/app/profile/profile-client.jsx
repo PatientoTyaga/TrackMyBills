@@ -62,11 +62,12 @@ export default function ProfileClient({ user }) {
 
   return (
     <div className="min-h-screen max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4 capitalize">{displayName}'s Profile</h1>
+      <h1 className="text-2xl font-bold mb-6 capitalize">{displayName}'s Profile</h1>
 
-      <div className="mb-6">
-        <p><strong>Email:</strong> {user.email}</p>
-        <label className="block mt-4 text-sm font-semibold">Username</label>
+      <div className="mt-8 mb-10">
+        <p className="mb-4"><strong>Email:</strong> {user.email}</p>
+
+        <label className="block mb-1 text-sm font-semibold">Username</label>
         <div className="flex gap-2 mt-1">
           <input
             type="text"
@@ -85,7 +86,12 @@ export default function ProfileClient({ user }) {
         <p className="text-sm text-gray-500 mt-2">Edit your display name above.</p>
       </div>
 
-      <div className="flex flex-col gap-4">
+      {/* Delete Section in Card */}
+      <div className="border rounded-lg p-6 bg-white shadow-sm dark:bg-gray-900 dark:border-gray-700">
+        <h2 className="text-lg font-semibold text-red-600 mb-4">Danger Zone</h2>
+        <p className="text-sm text-gray-700 dark:text-gray-300 mb-6">
+          Deleting your account is permanent and cannot be undone.
+        </p>
         <button
           onClick={() => setConfirmDelete(true)}
           className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
