@@ -33,7 +33,12 @@ export default async function UserHomePage() {
 
   return (
     <div className="min-h-screen p-6 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Welcome back, {user.user_metadata.username} 👋</h1>
+      <h1 className="text-3xl font-bold mb-6">
+        Welcome back,{' '}
+        <span className="inline-flex items-center gap-1 text-blue-600 font-semibold whitespace-nowrap capitalize">
+          {user.user_metadata.username} 👋
+        </span>
+      </h1>
 
       <BillDueAlert bills={unpaidBills} />
 
