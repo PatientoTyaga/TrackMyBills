@@ -48,35 +48,44 @@ export default function CategorySummaryChart({ bills }) {
       {chartData.length === 0 ? (
         <p className="text-sm text-gray-500">No bills to visualize.</p>
       ) : (
-        <div className="flex flex-col md:flex-row gap-6">
-          <PieChart width={340} height={340} className="mb-6">
-            <Pie
-              data={chartData}
-              dataKey="value"
-              nameKey="name"
-              outerRadius={110}
-              fill="#8884d8"
-              paddingAngle={5}
-              label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
-            >
-              {chartData.map((_, index) => (
-                <Cell key={index} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip
-              formatter={(value, name) => [`${value} bills`, `${name} (${((value / total) * 100).toFixed(1)}%)`]}
-            />
-            <Legend verticalAlign="bottom" height={36} />
-          </PieChart>
+        <>
+          {/* 👇 Scroll hint (mobile only) */}
+          <p className="text-xs text-center text-gray-400 md:hidden mb-2">
+            ← Scroll to explore more →
+          </p>
 
-          {suggestion && (
-            <div className="flex-1 flex items-center justify-center">
-              <p className="text-sm text-gray-700 dark:text-gray-300 text-center md:text-left">
-                💡 <strong>Insight:</strong> {suggestion}
-              </p>
+          <div className="flex flex-col md:flex-row gap-6 overflow-x-auto scroll-smooth pr-4">
+            <div className="min-w-[300px] max-w-full">
+              <PieChart width={320} height={320}>
+                <Pie
+                  data={chartData}
+                  dataKey="value"
+                  nameKey="name"
+                  outerRadius={110}
+                  fill="#8884d8"
+                  paddingAngle={5}
+                  label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                >
+                  {chartData.map((_, index) => (
+                    <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value, name) => [`${value} bills`, `${name} (${((value / total) * 100).toFixed(1)}%)`]}
+                />
+                <Legend verticalAlign="bottom" height={36} />
+              </PieChart>
             </div>
-          )}
-        </div>
+
+            {suggestion && (
+              <div className="flex-1 flex items-center justify-center">
+                <p className="text-sm text-gray-700 dark:text-gray-300 text-center md:text-left">
+                  💡 <strong>Insight:</strong> {suggestion}
+                </p>
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   )

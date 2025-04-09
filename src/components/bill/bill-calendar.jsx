@@ -52,13 +52,13 @@ export default function BillCalendar({ bills }) {
     }
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 relative h-[280px]">
-            <div className="flex justify-between items-center mb-3">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 relative min-h-[320px] sm:min-h-[280px]">
+            <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
                 <h3 className="text-lg font-semibold flex items-center gap-2">
                     <CalendarDays className="w-5 h-5 text-blue-600" />
                     {format(currentMonth, 'MMMM yyyy')} Bills
                 </h3>
-                <div className="space-x-2">
+                <div className="flex flex-wrap gap-2">
                     <button
                         onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
                         className="text-sm text-gray-500 dark:text-gray-300 hover:text-blue-600"

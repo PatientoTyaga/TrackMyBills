@@ -24,7 +24,7 @@ export default function MonthlyTrendChart({ bills }) {
     .sort((a, b) => new Date(a.month) - new Date(b.month))
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6 overflow-x-auto">
       <h3 className="text-lg font-semibold mb-4">📈 Unpaid Bill Count by Month</h3>
 
       {data.length === 0 ? (
@@ -33,7 +33,7 @@ export default function MonthlyTrendChart({ bills }) {
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
+            <XAxis dataKey="month" angle={-45} textAnchor="end" interval={0} height={60} />
             <YAxis allowDecimals={false} />
             <Tooltip formatter={(value) => `${value} bills`} />
             <Line type="monotone" dataKey="count" stroke="#8884d8" strokeWidth={2} />

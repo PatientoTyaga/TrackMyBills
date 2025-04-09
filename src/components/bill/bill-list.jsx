@@ -125,7 +125,7 @@ export default function BillList({ bills, setBills, onDelete, onMarkAsPaid, onEd
             : 'bg-red-100 text-red-700'
             }`}
         >
-          {title === 'Paid Bills' ? '✅' : '⏰'} {title}
+          {title === 'Paid Bills' ? <span className='mr-1'>✅</span> : <span className='mr-1'>⏰</span>} {title}
         </h3>
       </div>
 
@@ -140,15 +140,15 @@ export default function BillList({ bills, setBills, onDelete, onMarkAsPaid, onEd
                 key={bill.id}
                 className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow border border-gray-200 dark:border-gray-700"
               >
-                <div className="flex justify-between mb-2">
-                  <h3 className="font-semibold text-gray-800 dark:text-white">
+                <div className="flex justify-between flex-wrap gap-y-1 mb-2">
+                  <h3 className="font-semibold text-gray-800 dark:text-white break-words max-w-[70%]">
                     {bill.name}
                   </h3>
-                  <span className="text-sm text-gray-600 dark:text-gray-300">
+                  <span className="text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">
                     {symbol} {bill.amount}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-y-1 text-sm text-gray-500 dark:text-gray-400">
                   <span>
                     Due: {new Date(bill.due_date + 'T12:00:00').toLocaleDateString()}
                   </span>
@@ -159,8 +159,8 @@ export default function BillList({ bills, setBills, onDelete, onMarkAsPaid, onEd
                     )}
                   </span>
                 </div>
-                <div className="flex justify-between items-center mt-2 text-sm">
-                  <div className="flex gap-4">
+                <div className="flex flex-wrap justify-between items-center mt-2 text-sm gap-y-2">
+                  <div className="flex flex-wrap gap-4">
                     {isUnpaid && (
                       <button
                         onClick={() => setSelectedBill(bill)}
@@ -188,7 +188,7 @@ export default function BillList({ bills, setBills, onDelete, onMarkAsPaid, onEd
                       </button>
                     )}
                   </div>
-                  <span className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded">
+                  <span className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded mt-1 sm:mt-0">
                     {bill.frequency}
                   </span>
                 </div>

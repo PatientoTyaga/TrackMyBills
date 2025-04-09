@@ -30,7 +30,7 @@ export default function SignUpPage() {
   }, [])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
       <form
         action={signup}
         className="bg-white dark:bg-gray-800 p-8 rounded shadow-md w-full max-w-md"
