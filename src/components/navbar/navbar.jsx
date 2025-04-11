@@ -12,14 +12,23 @@ export default function Navbar({ user }) {
   const router = useRouter()
 
   useEffect(() => {
+    const savedTheme = localStorage.getItem('theme')
     const root = document.documentElement
-    setIsDark(root.classList.contains('dark'))
+
+    if (savedTheme === 'dark') {
+      root.classList.add('dark')
+      setIsDark(true)
+    } else {
+      root.classList.remove('dark')
+      setIsDark(false)
+    }
   }, [])
 
   const toggleTheme = () => {
     const root = document.documentElement
-    root.classList.toggle('dark')
-    setIsDark(!isDark)
+    const nowDark = root.classList.toggle('dark')
+    localStorage.setItem('theme', nowDark ? 'dark' : 'light')
+    setIsDark(nowDark)
   }
 
   return (
@@ -31,7 +40,7 @@ export default function Navbar({ user }) {
 
         {/* Desktop Menu */}
         <div className="hidden sm:flex items-center space-x-4">
-          <button onClick={toggleTheme} className="text-sm text-gray-600 dark:text-gray-300 hover:underline">
+          <button onClick={toggleTheme} className="text-sm text-gray-600 dark:text-gray-300 hover:underline cursor-pointer">
             {isDark ? 'Light Mode' : 'Dark Mode'}
           </button>
 
@@ -48,12 +57,15 @@ export default function Navbar({ user }) {
             </>
           ) : (
             <>
-              <Link href="/sign-in" className="text-sm text-gray-700 dark:text-gray-300 hover:underline">
+              <Link
+                href="/sign-in"
+                className="text-sm px-3 py-1.5 rounded hover:bg-blue-100 dark:hover:bg-gray-700 transition"
+              >
                 Sign In
               </Link>
               <Link
                 href="/sign-up"
-                className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition"
+                className="text-sm px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
               >
                 Sign Up
               </Link>
@@ -79,7 +91,7 @@ export default function Navbar({ user }) {
         <div className="space-y-3">
           <button
             onClick={toggleTheme}
-            className="block w-full text-left text-sm text-gray-600 dark:text-gray-300 hover:underline"
+            className="block w-full text-left text-sm px-3 py-1.5 rounded hover:bg-blue-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition cursor-pointer"
           >
             {isDark ? 'Light Mode' : 'Dark Mode'}
           </button>
@@ -97,12 +109,15 @@ export default function Navbar({ user }) {
             </>
           ) : (
             <>
-              <Link href="/sign-in" className="block text-sm text-gray-700 dark:text-gray-300 hover:underline">
+              <Link
+                href="/sign-in"
+                className="block text-sm px-3 py-1.5 rounded hover:bg-blue-100 dark:hover:bg-gray-700 transition"
+              >
                 Sign In
               </Link>
               <Link
                 href="/sign-up"
-                className="block text-sm bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition w-fit"
+                className="block text-sm px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 transition w-fit"
               >
                 Sign Up
               </Link>
