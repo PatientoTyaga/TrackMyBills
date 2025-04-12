@@ -21,14 +21,15 @@ export default function SignInPage() {
 
       // Clear the cookie
       document.cookie = 'flash_error=; Max-Age=0; path=/'
-      
+
       // Auto-clear from state after 3 seconds
       setTimeout(() => setMessage(''), 3000)
     }
   }, [])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+
+    <div className="min-h-screen flex items-center justify-center px-4">
       <form
         action={emailLogin}
         className="bg-white dark:bg-gray-800 p-8 rounded shadow-md w-full max-w-md"
@@ -49,7 +50,7 @@ export default function SignInPage() {
 
         <input
           type="password"
-          name= "password"
+          name="password"
           placeholder="Password"
           className="w-full px-4 py-2 mb-6 border rounded bg-gray-50 dark:bg-gray-700 text-black dark:text-white"
           value={password}
@@ -57,7 +58,7 @@ export default function SignInPage() {
           required
         />
 
-        <SubmitButton type = {"In"} />
+        <SubmitButton type={"In"} />
 
         <p className="mt-4 text-sm text-center text-gray-600 dark:text-gray-300">
           Don&apos;t have an account?{' '}
