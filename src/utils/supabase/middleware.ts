@@ -1,3 +1,4 @@
+import { syncCookies } from '@/app/utils/syncCookies'
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
@@ -37,17 +38,31 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
+    const pathname = request.nextUrl.pathname
+
     if (
         !user &&
-        !request.nextUrl.pathname.startsWith('/sign-in') &&
-        !request.nextUrl.pathname.startsWith('/auth') &&
-        !request.nextUrl.pathname.startsWith('/')
+        !pathname.startsWith('/sign-in') &&
+        !pathname.startsWith('/auth') &&
+        !pathname.startsWith('/')
     ) {
         // no user, potentially respond by redirecting the user to the login page
         const url = request.nextUrl.clone()
         url.pathname = '/sign-in'
         return NextResponse.redirect(url)
     }
+
+    // ✅ Redirect authenticated users away from sign-in and sign-up pages
+    if (user && (pathname === '/sign-in' || pathname === '/sign-up')) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/user-homepage'
+        const redirectResponse = NextResponse.redirect(url)
+
+        syncCookies(supabaseResponse, redirectResponse)
+
+        return redirectResponse
+    }
+
 
     // IMPORTANT: You *must* return the supabaseResponse object as it is.
     // If you're creating a new response object with NextResponse.next() make sure to:

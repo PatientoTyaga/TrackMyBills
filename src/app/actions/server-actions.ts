@@ -37,7 +37,6 @@ export async function emailLogin(formData: FormData) {
     redirect('/sign-in')
   }
 
-  revalidatePath('/', 'layout')
   redirect('/user-homepage')
 }
 
