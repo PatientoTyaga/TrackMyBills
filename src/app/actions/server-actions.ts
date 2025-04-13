@@ -147,7 +147,11 @@ export async function addBill(prevState: any, formData: FormData) {
     user_id: user.id,
   }
 
-  const { error } = await supabase.from('Bills').insert([bill])
+  const { data, error } = await supabase
+    .from('Bills')
+    .insert([bill])
+    .select()
+    .single()
 
   if (error) {
     console.error('[ADD BILL ERROR]:', error.message)
@@ -155,7 +159,11 @@ export async function addBill(prevState: any, formData: FormData) {
   }
 
   revalidatePath('/user-homepage')
-  return { success: true, message: 'Bill added successfully!' }
+  return {
+    success: true,
+    message: 'Bill added successfully!',
+    bill: data,
+  }
 }
 
 export async function deleteBill(id: string) {

@@ -8,6 +8,7 @@ import AddBillDialog from '@/components/add-bill/add-bill-dialog'
 import CategorySummaryChart from '@/components/category/category-summary-chart-wrapper'
 import BillListWrapper from '@/components/bill/bill-list-wrapper'
 import BillDueAlert from '@/components/alerts/bill-due-alert'
+import SyncClientSession from '@/components/sync/sync-client-session'
 
 export default async function UserHomePage() {
   const supabase = await createClient()
@@ -32,36 +33,41 @@ export default async function UserHomePage() {
   today.setHours(0, 0, 0, 0)
 
   return (
-    <div className="min-h-screen p-6 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">
-        Welcome back,{' '}
-        <span className="inline-flex items-center gap-1 text-blue-600 font-semibold whitespace-nowrap capitalize">
-          {user.user_metadata.username} 👋
-        </span>
-      </h1>
+    <>
+      <SyncClientSession />
 
-      <BillDueAlert bills={unpaidBills} />
+      <div className="min-h-screen p-6 max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold mb-6">
+          Welcome back,{' '}
+          <span className="inline-flex items-center gap-1 text-blue-600 font-semibold whitespace-nowrap capitalize">
+            {user.user_metadata.username} 👋
+          </span>
+        </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <DashboardBoard bills={bills} />
-        <BillCalendar bills={bills} hoverable />
+        <BillDueAlert bills={unpaidBills} />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <DashboardBoard bills={bills} />
+          <BillCalendar bills={bills} hoverable />
+        </div>
+
+        <div className="my-6">
+          <AddBillDialog user={user} />
+        </div>
+
+        <section className="mb-8">
+          <BillListWrapper bills={bills} />
+        </section>
+
+        <section className="mb-8">
+          <CategorySummaryChart bills={bills} />
+        </section>
+
+        <section className="mb-8">
+          <MonthlyTrendChart bills={bills} />
+        </section>
       </div>
+    </>
 
-      <div className="my-6">
-        <AddBillDialog user={user} />
-      </div>
-
-      <section className="mb-8">
-        <BillListWrapper bills={bills} />
-      </section>
-
-      <section className="mb-8">
-        <CategorySummaryChart bills={bills} />
-      </section>
-
-      <section className="mb-8">
-        <MonthlyTrendChart bills={bills} />
-      </section>
-    </div>
   )
 }
