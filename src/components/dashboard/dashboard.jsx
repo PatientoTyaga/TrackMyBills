@@ -14,6 +14,10 @@ export default function DashboardBoard({ bills }) {
   const totalPages = Math.ceil(unpaidUpcoming.length / billsPerPage)
 
   useEffect(() => {
+    setCurrentPage(0)
+  }, [bills])  
+
+  useEffect(() => {
     const interval = setInterval(() => {
       setCurrentPage((prev) => (prev + 1) % totalPages)
     }, 6000)
