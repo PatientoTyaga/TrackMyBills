@@ -1,28 +1,29 @@
 'use client'
+
 import { useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import { useRouter } from 'next/navigation'
 
 export default function SyncClientSession() {
   const supabase = createClient()
+  const router = useRouter()
 
   useEffect(() => {
-    const sync = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession()
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      console.log('[Auth Change]', event)
 
-      if (error) {
-        console.warn('[SyncClientSession] Error:', error.message)
+      if (event === 'SIGNED_OUT') {
+        console.log('[SyncClientSession] User signed out in another tab')
+        router.push('/sign-in')
       }
+    })
 
-      if (session) {
-        console.log('[SyncClientSession] Hydrating session:', session)
-        await supabase.auth.setSession(session)
-      } else {
-        console.log('[SyncClientSession] No session found.')
-      }
+    return () => {
+      subscription.unsubscribe()
     }
-
-    sync()
-  }, [])
+  }, [supabase, router])
 
   return null
 }

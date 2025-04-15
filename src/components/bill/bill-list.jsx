@@ -3,12 +3,8 @@
 import { useEffect, useState } from 'react'
 import currencies from '@/app/utils/currencies'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { useBills } from '@/context/bill-context'
 
-export default function BillList({ bills: billsProp, setBills: setBillsProp, onDelete, onMarkAsPaid, onEdit }) {
-  const { bills: billsFromHook, setBills: setBillsFromHook } = useBills()
-  const bills = billsProp ?? billsFromHook
-  const setBills = setBillsProp ?? setBillsFromHook
+export default function BillList({ bills, setBills, onDelete, onMarkAsPaid, onEdit }) {
 
   const [localBills, setLocalBills] = useState(bills)
   const [selectedBill, setSelectedBill] = useState(null)

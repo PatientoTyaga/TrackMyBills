@@ -1,12 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import currencies from '@/app/utils/currencies' 
-import { useBills } from '@/context/bill-context'
+import currencies from '@/app/utils/currencies'
 
-export default function DashboardBoard({ bills: billsProp }) {
-  const { bills: billsFromHook } = useBills()
-  const bills = billsProp ?? billsFromHook
+export default function DashboardBoard({ bills }) {
   const [currentPage, setCurrentPage] = useState(0)
   const billsPerPage = 4
 
