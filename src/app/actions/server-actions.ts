@@ -158,7 +158,6 @@ export async function addBill(prevState: any, formData: FormData) {
     return { success: false, message: 'Failed to add bill: ' + error.message }
   }
 
-  revalidatePath('/user-homepage')
   return {
     success: true,
     message: 'Bill added successfully!',

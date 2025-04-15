@@ -3,8 +3,12 @@
 import { useRouter } from 'next/navigation'
 import BillList from './bill-list'
 import { deleteBill, markBillAsPaid, editBill } from '@/app/actions/server-actions'
+import { useBills } from '@/context/bill-context'
 
-export default function BillListWrapper({ bills }) {
+export default function BillListWrapper({ bills: billsProp }) {
+  const { bills: billsFromHook } = useBills()
+  const bills = billsProp ?? billsFromHook
+
   const router = useRouter()
 
   const handleDelete = async (id) => {

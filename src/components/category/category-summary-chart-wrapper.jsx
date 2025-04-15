@@ -8,6 +8,6 @@ const CategorySummaryChart = dynamic(
   { ssr: false }
 )
 
-export default function CategorySummaryChartWrapper({ bills }) {
-  return <CategorySummaryChart bills={bills} />
+export default function CategorySummaryChartWrapper() {
+  return <CategorySummaryChart />
 }

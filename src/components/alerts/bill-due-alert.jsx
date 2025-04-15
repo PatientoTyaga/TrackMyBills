@@ -1,6 +1,13 @@
 'use client'
 
-export default function BillDueAlert({ bills }) {
+import { useBills } from "@/context/bill-context"
+
+
+export default function BillDueAlert({ bills: billsProp }) {
+  const { bills: billsFromHook } = useBills()
+
+  const bills = billsProp ?? billsFromHook
+
   if (!bills || bills.length === 0) return null
 
   const today = new Date()

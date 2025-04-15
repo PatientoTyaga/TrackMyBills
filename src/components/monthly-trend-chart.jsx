@@ -2,8 +2,10 @@
 
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts'
 import { format, parseISO } from 'date-fns'
+import { useBills } from '@/context/bill-context'
 
-export default function MonthlyTrendChart({ bills }) {
+export default function MonthlyTrendChart() {
+  const { bills } = useBills()
   // Filter unpaid bills
   const unpaidBills = bills.filter((bill) => !bill.is_paid)
 

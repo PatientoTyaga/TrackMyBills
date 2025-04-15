@@ -2,16 +2,24 @@
 
 import { addBill } from '@/app/actions/server-actions'
 import currencies from '@/app/utils/currencies'
+import { useBills } from '@/context/bill-context'
 import { useActionState, useEffect, useState } from 'react'
 
-export default function AddBillForm({ setBills, isAuthenticated }) {
+export default function AddBillForm({ isAuthenticated, setBills: setBillsProp }) {
+  const { setBills: setBillsFromHook, refetchBills } = useBills()
   const [formKey, setFormKey] = useState(Date.now())
   const [formState, formAction] = useActionState(addBill, { success: null, message: '' })
   const [visibleMessage, setVisibleMessage] = useState('')
 
+  const setBills = isAuthenticated ? setBillsFromHook : setBillsProp
+
   useEffect(() => {
     if (formState.message) {
       setVisibleMessage(formState.message)
+
+      if (formState.success && isAuthenticated) {
+        refetchBills()  // ✅ this updates immediately without refresh
+      }
 
       const timeout = setTimeout(() => {
         setVisibleMessage('')

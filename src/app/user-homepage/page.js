@@ -9,6 +9,7 @@ import CategorySummaryChart from '@/components/category/category-summary-chart-w
 import BillListWrapper from '@/components/bill/bill-list-wrapper'
 import BillDueAlert from '@/components/alerts/bill-due-alert'
 import SyncClientSession from '@/components/sync/sync-client-session'
+import { BillProvider } from '@/context/bill-context'
 
 export default async function UserHomePage() {
   const supabase = await createClient()
@@ -21,52 +22,43 @@ export default async function UserHomePage() {
     redirect('/sign-in')
   }
 
-  const { data: bills = [] } = await supabase
-    .from('Bills')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('due_date', { ascending: true })
-
-  const unpaidBills = bills.filter((bill) => !bill.is_paid)
-
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
   return (
     <>
       <SyncClientSession />
+      <BillProvider>
+        <div className="min-h-screen p-6 max-w-6xl mx-auto">
+          <h1 className="text-3xl font-bold mb-6">
+            Welcome back,{' '}
+            <span className="inline-flex items-center gap-1 text-blue-600 font-semibold whitespace-nowrap capitalize">
+              {user.user_metadata.username} 👋
+            </span>
+          </h1>
 
-      <div className="min-h-screen p-6 max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">
-          Welcome back,{' '}
-          <span className="inline-flex items-center gap-1 text-blue-600 font-semibold whitespace-nowrap capitalize">
-            {user.user_metadata.username} 👋
-          </span>
-        </h1>
+          <BillDueAlert />
 
-        <BillDueAlert bills={unpaidBills} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <DashboardBoard />
+            <BillCalendar hoverable />
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <DashboardBoard bills={bills} />
-          <BillCalendar bills={bills} hoverable />
+          <div className="my-6">
+            <AddBillDialog user={user} />
+          </div>
+
+          <section className="mb-8">
+            <BillListWrapper />
+          </section>
+
+          <section className="mb-8">
+            <CategorySummaryChart />
+          </section>
+
+          <section className="mb-8">
+            <MonthlyTrendChart />
+          </section>
         </div>
 
-        <div className="my-6">
-          <AddBillDialog user={user} />
-        </div>
-
-        <section className="mb-8">
-          <BillListWrapper bills={bills} />
-        </section>
-
-        <section className="mb-8">
-          <CategorySummaryChart bills={bills} />
-        </section>
-
-        <section className="mb-8">
-          <MonthlyTrendChart bills={bills} />
-        </section>
-      </div>
+      </BillProvider>
     </>
 
   )

@@ -1,11 +1,13 @@
 'use client'
 
+import { useBills } from '@/context/bill-context'
 import { useState } from 'react'
 import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts'
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1', '#d0ed57']
 
-export default function CategorySummaryChart({ bills }) {
+export default function CategorySummaryChart() {
+  const { bills } = useBills()
   const [showAll, setShowAll] = useState(false)
 
   const filteredBills = showAll ? bills : bills.filter((bill) => !bill.is_paid)

@@ -13,8 +13,12 @@ import {
 } from 'date-fns'
 import { CalendarDays } from 'lucide-react'
 import CategoryTag from '../category/category-tag'
+import { useBills } from '@/context/bill-context'
 
-export default function BillCalendar({ bills }) {
+export default function BillCalendar({ bills: billsProp }) {
+    const { bills: billsFromHook } = useBills()
+    const bills = billsProp ?? billsFromHook
+
     const today = new Date()
     const [hoveredDate, setHoveredDate] = useState(null)
     const [currentMonth, setCurrentMonth] = useState(today)
