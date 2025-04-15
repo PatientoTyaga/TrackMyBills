@@ -2,15 +2,23 @@
 
 import { addBill } from '@/app/actions/server-actions'
 import currencies from '@/app/utils/currencies'
+import { useRouter } from 'next/navigation'
 import { useActionState, useEffect, useState } from 'react'
 
 export default function AddBillForm({ isAuthenticated, setBills }) {
   const [formKey, setFormKey] = useState(Date.now())
   const [formState, formAction] = useActionState(addBill, { success: null, message: '' })
   const [visibleMessage, setVisibleMessage] = useState('')
+  const router = useRouter()
 
   useEffect(() => {
     if (formState.message) {
+      if (formState.message === 'Unauthorized') {
+        router.push('/sign-in')
+        router.refresh()
+        return
+      }
+
       setVisibleMessage(formState.message)
 
       const timeout = setTimeout(() => {
