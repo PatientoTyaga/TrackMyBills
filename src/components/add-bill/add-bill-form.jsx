@@ -9,6 +9,7 @@ export default function AddBillForm({ isAuthenticated, setBills }) {
   const [formKey, setFormKey] = useState(Date.now())
   const [formState, formAction] = useActionState(addBill, { success: null, message: '' })
   const [visibleMessage, setVisibleMessage] = useState('')
+  const [localSuccess, setLocalSuccess] = useState(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -36,26 +37,37 @@ export default function AddBillForm({ isAuthenticated, setBills }) {
     e.preventDefault()
     const form = e.target
 
-    const newBill = {
-      id: Date.now(),
-      name: form.name.value,
-      due_date: form.due_date.value,
-      amount: parseFloat(form.amount.value),
-      currency: form.currency.value,
-      frequency: form.frequency.value,
-      reminder_days: parseInt(form.reminder_days.value),
-      category: form.category.value,
-      is_paid: false,
+    try {
+      const newBill = {
+        id: Date.now(),
+        name: form.name.value,
+        due_date: form.due_date.value,
+        amount: parseFloat(form.amount.value),
+        currency: form.currency.value,
+        frequency: form.frequency.value,
+        reminder_days: parseInt(form.reminder_days.value),
+        category: form.category.value,
+        is_paid: false,
+      }
+
+      const stored = JSON.parse(localStorage.getItem('bills')) || []
+      const updated = [...stored, newBill]
+      localStorage.setItem('bills', JSON.stringify(updated))
+      if (setBills) setBills(updated)
+
+      setVisibleMessage('Bill added successfully!')
+      setLocalSuccess(true)
+      setFormKey(Date.now())
+    } catch (error) {
+      console.error('❌ Failed to save bill locally:', err)
+      setVisibleMessage('Failed to save bill locally.')
+      setLocalSuccess(false)
     }
 
-    const stored = JSON.parse(localStorage.getItem('bills')) || []
-    const updated = [...stored, newBill]
-    localStorage.setItem('bills', JSON.stringify(updated))
-    if (setBills) setBills(updated)
-
-    setVisibleMessage('Bill added locally!')
-    setFormKey(Date.now())
-    setTimeout(() => setVisibleMessage(''), 4000)
+    setTimeout(() => {
+      setVisibleMessage('')
+      setLocalSuccess(null)
+    }, 4000)
   }
 
   return (
@@ -80,7 +92,7 @@ export default function AddBillForm({ isAuthenticated, setBills }) {
         <input
           type="date"
           name="due_date"
-          className="w-full border px-3 py-2 rounded"
+          className="w-full border px-3 py-2 rounded bg-white dark:bg-gray-800 text-black dark:text-white"
           required
         />
       </div>
@@ -151,7 +163,14 @@ export default function AddBillForm({ isAuthenticated, setBills }) {
 
       {/* Feedback message */}
       {visibleMessage && (
-        <p className={`text-sm mt-2 ${formState.success ? 'text-green-600' : 'text-red-600'}`}>
+        <p className={`text-sm mt-2 ${isAuthenticated
+          ? formState.success
+            ? 'text-green-600'
+            : 'text-red-600'
+          : localSuccess
+            ? 'text-green-600'
+            : 'text-red-600'
+          }`}>
           {visibleMessage}
         </p>
       )}

@@ -40,7 +40,10 @@ export default function Navbar({ user }) {
 
         {/* Desktop Menu */}
         <div className="hidden sm:flex items-center space-x-4">
-          <button onClick={toggleTheme} className="text-sm text-gray-600 dark:text-gray-300 hover:underline cursor-pointer">
+          <button
+            onClick={toggleTheme}
+            className="text-sm px-3 py-1.5 rounded hover:bg-blue-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition cursor-pointer"
+          >
             {isDark ? 'Light Mode' : 'Dark Mode'}
           </button>
 

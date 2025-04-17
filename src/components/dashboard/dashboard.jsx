@@ -15,7 +15,7 @@ export default function DashboardBoard({ bills }) {
 
   useEffect(() => {
     setCurrentPage(0)
-  }, [bills])  
+  }, [bills])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -48,9 +48,12 @@ export default function DashboardBoard({ bills }) {
                   key={idx}
                   className="flex justify-between border-b border-green-700 pb-1"
                 >
-                  <span>{bill.name}</span>
-                  <span>{symbol} {bill.amount}</span>
-                  <span className="text-xs">
+                  <span className="w-1/3 truncate">{bill.name}</span>
+                  <span className="inline-flex gap-1 w-24 justify-end font-mono">
+                    <span className="shrink-0">{symbol}</span>
+                    <span>{bill.amount}</span>
+                  </span>
+                  <span className="w-24 text-right text-xs">
                     {new Date(bill.due_date + 'T12:00:00').toLocaleDateString()}
                   </span>
                 </li>
