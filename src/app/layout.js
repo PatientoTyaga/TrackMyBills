@@ -5,7 +5,6 @@ import Loading from "./loading";
 import Footer from "@/components/footer";
 import { Toaster } from "sonner";
 import NavbarWrapper from "@/components/navbar";
-import SyncClientSession from "@/components/sync/sync-client-session";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +27,6 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300`}
       >
-        <SyncClientSession />
         <NavbarWrapper />
         <main className="flex-1">
           <Suspense fallback={<Loading />}>
