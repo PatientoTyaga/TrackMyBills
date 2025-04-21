@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
+import { loginSchema, signupSchema } from '../utils/auth-schemas'
 
 async function getAuthenticatedUser() {
   const supabase = await createClient()
@@ -24,29 +25,58 @@ export async function emailLogin(formData: FormData) {
   const supabase = await createClient()
   const cookieStore = await cookies()
 
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
+  const formValues = {
+    email: formData.get('email'),
+    password: formData.get('password'),
   }
 
-  const { error } = await supabase.auth.signInWithPassword(data)
+  const result = loginSchema.safeParse(formValues)
+
+  if (!result.success) {
+    console.error('[LOGIN VALIDATION ERROR]:', result.error.flatten())
+    await cookieStore.set('flash_error', 'Invalid email or password format')
+    return redirect('/sign-in')
+  }
+
+  const { email, password } = result.data
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
     console.error('[LOGIN ERROR]:', error.message)
       ; (await cookieStore).set('flash_error', 'Invalid email or password')
-    redirect('/sign-in')
+    return redirect('/sign-in')
   }
 
-  redirect('/user-homepage')
+  return redirect('/user-homepage')
 }
 
 export async function signup(formData: FormData) {
   const supabase = await createClient()
   const cookieStore = await cookies()
 
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-  const username = formData.get('username') as string
+  const formValues = {
+    email: formData.get('email'),
+    password: formData.get('password'),
+    username: formData.get('username'),
+  }
+
+  const result = signupSchema.safeParse(formValues)
+
+  if (!result.success) {
+    const fieldErrors = result.error.flatten().fieldErrors
+    const firstError =
+      fieldErrors.username?.[0] ||
+      fieldErrors.email?.[0] ||
+      fieldErrors.password?.[0] ||
+      'Invalid input'
+
+    console.error('[SIGNUP VALIDATION ERROR]:', fieldErrors)
+    await cookieStore.set('flash_error', firstError)
+    return redirect('/sign-up')
+  }
+
+  const { email, password, username } = result.data
 
   const { error } = await supabase.auth.signUp({
     email,
@@ -59,11 +89,11 @@ export async function signup(formData: FormData) {
   if (error) {
     console.error('[SIGNUP ERROR]:', error.message)
       ; (await cookieStore).set('flash_error', 'Error signing up. Please try again.')
-    redirect('/sign-up')
+    return redirect('/sign-up')
   }
 
   revalidatePath('/', 'layout')
-  redirect('/sign-in')
+  return redirect('/sign-in')
 }
 
 export async function signOut() {
@@ -76,7 +106,7 @@ export async function signOut() {
 
   await supabase.auth.signOut()
   revalidatePath('/', 'layout')
-  redirect('/sign-in')
+  return redirect('/sign-in')
 }
 
 export async function deleteUserAccount(userId: string) {

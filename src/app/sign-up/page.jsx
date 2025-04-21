@@ -29,10 +29,18 @@ export default function SignUpPage() {
     }
   }, [])
 
+  const handleSubmit = (e) => {
+    if (password.length < 6) {
+      e.preventDefault()
+      setMessage('Password must be at least 6 characters long')
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <form
         action={signup}
+        onSubmit={handleSubmit}
         className="bg-white dark:bg-gray-800 p-8 rounded shadow-md w-full max-w-md"
       >
         <h1 className="text-2xl font-bold mb-4 text-center text-blue-600">Sign Up</h1>

@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { emailLogin } from '../actions/server-actions'
 import { SubmitButton } from '@/components/submit-btn'
-import { useSearchParams } from 'next/navigation'
 
 export default function SignInPage() {
   const [email, setEmail] = useState('')

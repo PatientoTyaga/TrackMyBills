@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { contactSchema } from '../utils/auth-schemas'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -22,6 +23,21 @@ export default function ContactPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    const result = contactSchema.safeParse(formData)
+
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors
+      const firstError =
+        fieldErrors.name?.[0] ||
+        fieldErrors.email?.[0] ||
+        fieldErrors.subject?.[0] ||
+        fieldErrors.message?.[0] ||
+        'Invalid form data'
+  
+      setError(firstError)
+      return
+    }
 
     try {
       const response = await fetch('https://formspree.io/f/xblgnlnv', {
