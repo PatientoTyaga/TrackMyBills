@@ -47,8 +47,9 @@ cp .env.example .env.local
 # Fill in your environment variables
 npm run dev
 
+---
 
-🔐 Environment Variables
+## 🔐 Environment Variables
 | Variable | Purpose |
 |----------|---------|
 | NEXT_PUBLIC_SUPABASE_URL | Supabase project URL |
@@ -58,7 +59,7 @@ npm run dev
 
 ---
 
-✨ Authentication Flow
+## ✨ Authentication Flow
 - Sign up with email and password.
 - Supabase sends verification email.
 - User is redirected to `/user-homepage`.
@@ -67,7 +68,7 @@ npm run dev
 
 ---
 
-🧱 Folder Structure
+## 🧱 Folder Structure
 ```bash
 /app
   /sign-up
