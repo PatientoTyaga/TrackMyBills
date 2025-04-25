@@ -7,7 +7,7 @@ It features **secure authentication**, **upcoming bill alerts**, **real-time upd
 
 ## 🚀 Live Demo
 
-[Coming Soon] — or add your deployment link here
+[Coming Soon]
 
 ---
 
