@@ -46,6 +46,7 @@ npm install
 cp .env.example .env.local
 # Fill in your environment variables
 npm run dev
+```
 
 ---
 
