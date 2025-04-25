@@ -1,25 +1,48 @@
-# 📆 TrackMyBills
+# TrackMyBills
 
-**TrackMyBills** is a simple web application that helps you stay on top of your subscriptions and bill payments. Never miss a due date or get caught off guard again.
+TrackMyBills is a full-stack web application that helps users **track and manage their recurring bills** and **subscriptions** easily.  
+It features **secure authentication**, **upcoming bill alerts**, **real-time updates across tabs**, and **visual charts** for spending trends.
 
-## ✨ Features
+---
 
-- Add and manage bills & subscriptions
-- Track upcoming and overdue payments
-- Mark bills as paid
-- Store data locally in your browser
-- Get reminders before due dates *(coming soon)*
+## 🚀 Live Demo
 
-## 🚀 Tech Stack
+[Coming Soon] — or add your deployment link here
 
-- [Next.js](https://nextjs.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- LocalStorage (for persistent data)
-- date-fns *(for date utilities)*
+---
+
+## 📦 Tech Stack
+
+- [Next.js 14+ (App Router)]
+- [Supabase (Auth, Database, Realtime)]
+- [Tailwind CSS]
+- [Zod (Form validation)]
+- [Formspree (Contact Us form handling)]
+- [Lucide-react (Icons)]
+- [Chart.js (Charts for bill analysis)]
+
+---
+
+## 📋 Features
+
+- ✅ **Sign Up / Sign In** (Email + Password with Email Verification)
+- ✅ **Bill Management** (Add, Edit, Delete, Categorize bills)
+- ✅ **Recurring Bills** (Automatic handling for monthly/yearly bills)
+- ✅ **Real-time Sync** (Across tabs using Supabase Realtime channels)
+- ✅ **Bill Due Alerts** (Upcoming bills with visual alerts)
+- ✅ **Spending Charts** (Category breakdown and Monthly Trends)
+- ✅ **Contact Us Form** (Secure contact form with anti-XSS validation)
+
+---
 
 ## 🛠️ Getting Started
 
-1. Clone the repo:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/trackmybills.git
-   cd trackmybills
+Clone the repository:
+
+```bash
+git clone https://github.com/your-username/TrackMyBills.git
+cd TrackMyBills
+npm install
+cp .env.example .env.local
+# Fill in your environment variables
+npm run dev
