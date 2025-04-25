@@ -50,25 +50,31 @@ npm run dev
 ---
 
 ## 🔐 Environment Variables
+
 | Variable | Purpose |
 |----------|---------|
-| NEXT_PUBLIC_SUPABASE_URL | Supabase project URL |
-| NEXT_PUBLIC_SUPABASE_ANON_KEY | Supabase anon public API key |
-| NEXT_PUBLIC_BASE_URL | Base URL for redirects |
-| FORMSPREE_ENDPOINT | Formspree form endpoint URL |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon public API key |
+| `NEXT_PUBLIC_BASE_URL` | Base URL for redirects (ex: `http://localhost:3000`) |
+| `FORMSPREE_ENDPOINT` | Formspree form endpoint URL |
+
+> Create a `.env.local` file based on the provided `.env.example`.
 
 ---
 
 ## ✨ Authentication Flow
-- Sign up with email and password.
-- Supabase sends verification email.
-- User is redirected to `/user-homepage`.
-- Username is stored securely in `user_metadata`.
-- Note: Profiles table setup deferred for future.
+
+- Sign up with email and password
+- Supabase sends a verification email
+- After email confirmation, user is redirected to `/user-homepage`
+- Username is stored securely in `user_metadata`
+
+> **Note:** Profile table setup was considered but deferred for future expansion.
 
 ---
 
 ## 🧱 Folder Structure
+
 ```bash
 /app
   /sign-up
@@ -80,3 +86,4 @@ npm run dev
 /hooks
 /utils
 /public
+
