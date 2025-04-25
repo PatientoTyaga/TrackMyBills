@@ -46,3 +46,36 @@ npm install
 cp .env.example .env.local
 # Fill in your environment variables
 npm run dev
+
+
+## 🔐 Environment Variables
+| Variable | Purpose |
+|----------|---------|
+| NEXT_PUBLIC_SUPABASE_URL | Supabase project URL |
+| NEXT_PUBLIC_SUPABASE_ANON_KEY | Supabase anon public API key |
+| NEXT_PUBLIC_BASE_URL | Base URL for redirects |
+| FORMSPREE_ENDPOINT | Formspree form endpoint URL |
+
+---
+
+## ✨ Authentication Flow
+- Sign up with email and password.
+- Supabase sends verification email.
+- User is redirected to `/user-homepage`.
+- Username is stored securely in `user_metadata`.
+- Note: Profiles table setup deferred for future.
+
+---
+
+## 🧱 Folder Structure
+```bash
+/app
+  /sign-up
+  /sign-in
+  /user-homepage
+  /contact
+/components
+/context
+/hooks
+/utils
+/public
