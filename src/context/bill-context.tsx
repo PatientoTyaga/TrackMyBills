@@ -1,12 +1,11 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { supabase } from '@/utils/supabase/client'
 
 const BillContext = createContext(null)
 
 export function BillProvider({ children }) {
-    const supabase = createClient()
     const [bills, setBills] = useState([])
 
     const refetchBills = useCallback(async () => {

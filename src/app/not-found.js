@@ -2,11 +2,10 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { supabase } from '@/utils/supabase/client'
 
 export default function NotFound() {
   const [homeHref, setHomeHref] = useState('/')
-  const supabase = createClient()
 
   useEffect(() => {
     const checkSession = async () => {
