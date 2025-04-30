@@ -93,6 +93,7 @@ export async function signup(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
+  await cookieStore.set('flash_success', 'Check your inbox for a confirmation email. If your email is already registered, you can sign in directly.')
   return redirect('/sign-in')
 }
 

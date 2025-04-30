@@ -9,20 +9,34 @@ export default function SignInPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
+  const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
-    const flash = document.cookie
+    const errorFlash = document.cookie
       .split('; ')
       .find((row) => row.startsWith('flash_error='))
-    if (flash) {
-      const msg = decodeURIComponent(flash.split('=')[1])
+    if (errorFlash) {
+      const msg = decodeURIComponent(errorFlash.split('=')[1])
       setMessage(msg)
+      setIsSuccess(false)
 
       // Clear the cookie
       document.cookie = 'flash_error=; Max-Age=0; path=/'
 
       // Auto-clear from state after 3 seconds
       setTimeout(() => setMessage(''), 3000)
+    }
+
+    const successFlash = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('flash_success='))
+
+    if (successFlash) {
+      const msg = decodeURIComponent(successFlash.split('=')[1])
+      setMessage(msg)
+      setIsSuccess(true)
+      document.cookie = 'flash_success=; Max-Age=0; path=/'
+      setTimeout(() => setMessage(''), 4000)
     }
   }, [])
 
@@ -35,7 +49,11 @@ export default function SignInPage() {
       >
         <h1 className="text-2xl font-bold mb-4 text-center text-blue-600">Sign In</h1>
 
-        {message && <p className="text-red-500 text-sm mb-4 text-center">{message}</p>}
+        {message && (
+          <p className={`text-sm mb-4 text-center ${isSuccess ? 'text-green-600' : 'text-red-500'}`}>
+            {message}
+          </p>
+        )}
 
         <input
           type="email"
@@ -58,6 +76,12 @@ export default function SignInPage() {
         />
 
         <SubmitButton type={"In"} />
+
+        <p className="mt-2 text-sm text-center">
+          <Link href="/reset-password" className="text-blue-600 hover:underline">
+            Forgot your password?
+          </Link>
+        </p>
 
         <p className="mt-4 text-sm text-center text-gray-600 dark:text-gray-300">
           Don&apos;t have an account?{' '}
