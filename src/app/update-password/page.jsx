@@ -17,6 +17,7 @@ export default function UpdatePasswordPage() {
       setMessage('Failed to update password.')
     } else {
       setMessage('Password updated! Redirecting...')
+      await supabase.auth.signOut()
       setTimeout(() => router.push('/sign-in'), 2000)
     }
   }
