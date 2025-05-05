@@ -12,6 +12,20 @@ export default function Navbar({ user }) {
   const router = useRouter()
 
   useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('[Navbar] Tab became visible, refreshing')
+        router.refresh()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [router])
+
+  useEffect(() => {
     const savedTheme = localStorage.getItem('theme')
     const root = document.documentElement
 
