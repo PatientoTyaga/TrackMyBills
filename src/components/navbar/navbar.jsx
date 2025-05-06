@@ -14,7 +14,6 @@ export default function Navbar({ user }) {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        console.log('[Navbar] Tab became visible, refreshing')
         router.refresh()
       }
     }

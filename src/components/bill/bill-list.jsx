@@ -12,6 +12,7 @@ export default function BillList({ bills, setBills, onDelete, onMarkAsPaid, onEd
   const [filter, setFilter] = useState('All')
   const [editedAmount, setEditedAmount] = useState('')
   const [editedDueDate, setEditedDueDate] = useState('')
+  const [editError, setEditError] = useState('')
 
   useEffect(() => {
     setLocalBills(bills)
@@ -84,7 +85,16 @@ export default function BillList({ bills, setBills, onDelete, onMarkAsPaid, onEd
   }
 
   const editBill = async () => {
-    if (!editedAmount || isNaN(editedAmount) || !editedDueDate) return
+    if (
+      !editedAmount ||
+      isNaN(editedAmount) ||
+      parseFloat(editedAmount) < 0 ||
+      !editedDueDate
+    ) {
+      setEditError('Amount must be a positive number')
+      return
+    }
+
     const isAuthenticated = typeof onEdit === 'function'
     const updatedAmount = parseFloat(editedAmount)
 
@@ -182,6 +192,7 @@ export default function BillList({ bills, setBills, onDelete, onMarkAsPaid, onEd
                           setEditingBill(bill)
                           setEditedAmount(bill.amount.toString())
                           setEditedDueDate(bill.due_date)
+                          setEditError('')
                         }}
                         className="text-yellow-600 hover:underline"
                       >
@@ -251,7 +262,10 @@ export default function BillList({ bills, setBills, onDelete, onMarkAsPaid, onEd
       </Dialog>
 
       {/* Edit Dialog */}
-      <Dialog open={!!editingBill} onOpenChange={() => setEditingBill(null)}>
+      <Dialog open={!!editingBill} onOpenChange={() => {
+        setEditingBill(null)
+        setEditError('')
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Bill</DialogTitle>
@@ -260,11 +274,18 @@ export default function BillList({ bills, setBills, onDelete, onMarkAsPaid, onEd
             <label className="block text-sm mb-1 text-gray-700 dark:text-gray-300">New Amount</label>
             <input
               type="number"
+              min="0"
+              step="0.01"
               className="w-full px-3 py-2 border rounded dark:bg-gray-800 dark:text-white"
               value={editedAmount}
               onChange={(e) => setEditedAmount(e.target.value)}
             />
           </div>
+
+          {editError && (
+            <p className="text-red-500 text-sm mb-4">{editError}</p>
+          )}
+
           <div className="mb-4">
             <label className="block text-sm mb-1 text-gray-700 dark:text-gray-300">New Due Date</label>
             <input
