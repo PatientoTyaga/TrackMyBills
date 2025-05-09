@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { deleteUserAccount, updateUsername } from '../actions/server-actions'
+import { supabase } from '@/utils/supabase/client'
 
 export default function ProfileClient({ user }) {
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -48,6 +49,7 @@ export default function ProfileClient({ user }) {
       toast.success('Username updated')
       setDisplayName(inputUsername.trim())
       setInputUsername('')
+      await supabase.auth.refreshSession()
       router.refresh()
     } else {
       toast.error(result.message || 'Update failed')

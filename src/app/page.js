@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import AddBillDialog from '@/components/add-bill/add-bill-dialog'
 import BillList from '@/components/bill/bill-list'
 import BillDueAlert from '@/components/alerts/bill-due-alert'
+import Link from 'next/link'
 
 export default function Home() {
   const [bills, setBills] = useState([])
@@ -90,12 +91,12 @@ export default function Home() {
           </video>
         </div>
 
-        <a
+        <Link
           href="/sign-up"
           className="inline-block mt-6 bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition"
         >
           Create a Free Account
-        </a>
+        </Link>
       </section>
     </div>
   )

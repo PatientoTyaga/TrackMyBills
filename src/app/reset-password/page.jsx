@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/utils/supabase/client'
+import { useRouter } from 'next/navigation'
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState('')
