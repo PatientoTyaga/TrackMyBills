@@ -55,6 +55,8 @@ export default function BillCalendar({ bills: billsProp }) {
         setCurrentMonth(today)
     }
 
+    const firstDayOfWeek = startOfMonth(currentMonth).getDay();
+
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 relative min-h-[320px] sm:min-h-[280px]">
             <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
@@ -95,62 +97,74 @@ export default function BillCalendar({ bills: billsProp }) {
                 </span>
             </div>
 
-            <div className="grid grid-cols-7 gap-2 text-center text-sm">
-                {currentMonthDays.map((date) => {
-                    const hasBills = hasBillsOnDate(date)
-                    const allPaid = allBillsPaidOnDate(date)
-                    const isPast = date < startOfMonth(today)
+            <div>
+                <div className="grid grid-cols-7 text-center text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                        <div key={day}>{day}</div>
+                    ))}
+                </div>
 
-                    return (
-                        <div
-                            key={date.toISOString()}
-                            onMouseEnter={() => setHoveredDate(date)}
-                            onMouseLeave={() => setHoveredDate(null)}
-                            className="relative"
-                        >
+                <div className="grid grid-cols-7 gap-2 text-center text-sm">
+                    {Array.from({ length: firstDayOfWeek }).map((_, index) => (
+                        <div key={`empty-${index}`} />
+                    ))}
+
+                    {currentMonthDays.map((date) => {
+                        const hasBills = hasBillsOnDate(date)
+                        const allPaid = allBillsPaidOnDate(date)
+                        const isPast = date < startOfMonth(today)
+
+                        return (
                             <div
-                                className={`py-1 px-2 rounded cursor-default flex items-center justify-center gap-1 ${allPaid
-                                    ? 'bg-green-100 text-green-800 font-semibold'
-                                    : hasBills
-                                        ? 'bg-blue-100 text-blue-800 font-semibold'
-                                        : isPast
-                                            ? 'text-gray-400 dark:text-gray-500'
-                                            : 'text-gray-600 dark:text-gray-300'
-                                    }`}
+                                key={date.toISOString()}
+                                onMouseEnter={() => setHoveredDate(date)}
+                                onMouseLeave={() => setHoveredDate(null)}
+                                className="relative"
                             >
-                                {format(date, 'd')}
-                                {allPaid && <span>✅</span>}
-                            </div>
-
-                            {hoveredDate && isSameDay(hoveredDate, date) && billsForDate(date).length > 0 && (
-                                <div className="absolute z-10 top-full left-1/2 transform -translate-x-1/2 mt-1 w-52 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-lg rounded p-2 text-left text-xs">
-                                    <strong className="block mb-1">{format(new Date(date), 'PPP')}</strong>
-                                    <ul className="space-y-1">
-                                        {billsForDate(date).map((bill) => (
-                                            <li key={bill.id} className="flex flex-col">
-                                                <div className="flex justify-between">
-                                                    <span>
-                                                        📝 <strong>{bill.name}</strong>: {bill.amount} {bill.currency}
-                                                    </span>
-                                                </div>
-                                                <div className="flex justify-between mt-1">
-                                                    <span className={bill.is_paid ? 'text-green-600' : 'text-red-500'}>
-                                                        ({bill.is_paid ? 'Paid' : 'Unpaid'})
-                                                    </span>
-                                                    {bill.category && (
-                                                        <span className="ml-2">
-                                                            <CategoryTag category={bill.category} />
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
+                                <div
+                                    className={`py-1 px-2 rounded cursor-default flex items-center justify-center gap-1 ${allPaid
+                                        ? 'bg-green-100 text-green-800 font-semibold'
+                                        : hasBills
+                                            ? 'bg-blue-100 text-blue-800 font-semibold'
+                                            : isPast
+                                                ? 'text-gray-400 dark:text-gray-500'
+                                                : 'text-gray-600 dark:text-gray-300'
+                                        }`}
+                                >
+                                    {format(date, 'd')}
+                                    {allPaid && <span>✅</span>}
                                 </div>
-                            )}
-                        </div>
-                    )
-                })}
+
+                                {hoveredDate && isSameDay(hoveredDate, date) && billsForDate(date).length > 0 && (
+                                    <div className="absolute z-10 top-full left-1/2 transform -translate-x-1/2 mt-1 w-52 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-lg rounded p-2 text-left text-xs">
+                                        <strong className="block mb-1">{format(new Date(date), 'PPP')}</strong>
+                                        <ul className="space-y-1">
+                                            {billsForDate(date).map((bill) => (
+                                                <li key={bill.id} className="flex flex-col">
+                                                    <div className="flex justify-between">
+                                                        <span>
+                                                            📝 <strong>{bill.name}</strong>: {bill.amount} {bill.currency}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex justify-between mt-1">
+                                                        <span className={bill.is_paid ? 'text-green-600' : 'text-red-500'}>
+                                                            ({bill.is_paid ? 'Paid' : 'Unpaid'})
+                                                        </span>
+                                                        {bill.category && (
+                                                            <span className="ml-2">
+                                                                <CategoryTag category={bill.category} />
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    })}
+                </div>
             </div>
         </div>
     )
