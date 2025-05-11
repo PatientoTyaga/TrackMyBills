@@ -32,7 +32,7 @@ export default function DashboardBoard({ bills }) {
   return (
     <section className="space-y-6">
       {/* Airport Board */}
-      <div className="bg-black dark:bg-gray-800 text-green-500 font-mono p-6 rounded-lg shadow-md overflow-hidden h-[280px]">
+      <div className="bg-black dark:bg-gray-800 text-green-500 font-mono p-6 rounded-lg shadow-md overflow-hidden h-[380px]">
         <h2 className="text-xl font-bold mb-2 border-b border-green-500 pb-2">
           Upcoming Payments
         </h2>
