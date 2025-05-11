@@ -7,7 +7,7 @@ It features **secure authentication**, **upcoming bill alerts**, **real-time upd
 
 ## 🚀 Live Demo
 
-[Coming Soon]
+👉 [Try the Live App]https://trackmybills.org/
 
 ---
 
